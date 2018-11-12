@@ -1,0 +1,35 @@
+Project_name	Saliva01
+read1	/home3/scc20x/Desktop/practiceHCMV/PRJNA493765/S01/1_cleanReads/Saliva-01_hq_1.fastq
+read2	/home3/scc20x/Desktop/practiceHCMV/PRJNA493765/S01/1_cleanReads/Saliva-01_hq_2.fastq
+readsToSubsample	30000
+referenceFasta	/home3/scc20x/hcmvReference/hcmv_genome.fasta
+#Perform reads quality filtering
+Reads_quality_filter	yes
+minQualMean	28
+trimLeft	7
+trimQualRight	28
+trimQualWindow	30
+trimQualStep	5
+minLen	50
+removeDup	yes
+#Perform reads alignment
+Reads_alignment	yes
+#Get blocks and superblocks
+getBlocks	yes
+#De novo assembly on superblocks
+reconstructSuperBlocks	yes
+#Redundancy removal
+removeRedundancy	yes
+#Reads mapping on supercontigs
+readsReMapping	yes
+#Reads correction
+readsCorrection	yes
+#Gap closing
+gapClosing	yes
+
+
+
+
+
+
+
