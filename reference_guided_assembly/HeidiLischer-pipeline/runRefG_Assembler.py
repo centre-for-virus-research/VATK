@@ -56,7 +56,6 @@ logFile.write("Quality filtering: "+qualityFiltering+"\n")
 
 if qualityFiltering == "yes" or qualityFiltering == "Yes":
     now = datetime.datetime.now()
-    os.system("cp /home3/scc20x/Software/mySoftware/RGAscripts/readsFiltering.py .")
     logFile.write("Quality filtering started at "+now.strftime("%H:%M")+"\n")
 
     qualConfFile = open("qualityFiltering.conf","w")
@@ -90,7 +89,6 @@ else:
 
 #Perform subsampling
 print "\nPerforming reads fastq subsampling......"
-os.system("cp /home3/scc20x/Software/mySoftware/RGAscripts/get_randomPE.py .")
 os.system("python get_randomPE.py ./1_cleanReads/"+projectName+"_hq_1.fastq ./1_cleanReads/"+projectName+"_hq_2.fastq 30000")
 os.system("mv ./1_cleanReads/"+projectName+"_hq_1.fastq.subset ./1_cleanReads/"+projectName+"_hq_1_subSample.fastq")
 os.system("mv ./1_cleanReads/"+projectName+"_hq_2.fastq.subset ./1_cleanReads/"+projectName+"_hq_2_subSample.fastq")
@@ -133,8 +131,7 @@ if reconstructBlocks == 'yes' or reconstructBlocks == 'Yes':
     os.system("bedtools genomecov -ibam ../2_referenceAlignment/mappedHQ.bam  -bga > coverage.txt") #Produce a general coverage file
     #With the following coverage is calculated considering only the proper paired reads
     os.system("samtools view -b -f 2 ../2_referenceAlignment/mappedHQ.bam | samtools sort - -n | bedtools bamtobed -i - -bedpe | awk '$1 == $4' | cut -f 1,2,6 | sort -k 1,1 | bedtools genomecov -i - -bga -g "+referenceSeq+".fai > coverage_Paired.txt")
-    os.system("cp /home3/scc20x/Software/mySoftware/RGAscripts/GetBlocks.jar .")
-    os.system("java -jar GetBlocks.jar -i coverage.txt -paired coverage_Paired.txt -o blocks.txt -oSuper superBlocks.txt -mCov 10 -sLength 12000 -sOverlap 300 -maxLength 100000")
+    os.system("java -jar ../GetBlocks.jar -i coverage.txt -paired coverage_Paired.txt -o blocks.txt -oSuper superBlocks.txt -mCov 10 -sLength 12000 -sOverlap 300 -maxLength 100000")
     os.chdir("..")
 
 #***************************************************************
