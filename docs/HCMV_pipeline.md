@@ -17,23 +17,27 @@ and have the extension \_R1\_001.fastq and \_R2\_001.fastq (or \_R1\_001.fq and 
 
 <lib_name> is the name of the reference library when building the bowtie2 index
 
-**Pipeline**
+###Pipeline
 
-### Step 1:
+#### Step 1:
+
 Each fastq file in the folder is trimmed using [trim_galore](https://github.com/FelixKrueger/TrimGalore)
  with the following settings (--paired --length 21 --quality 10 --stringency 3).
 
-### Step 2:
+#### Step 2:
+
 The processed reads are subsequently aligned against the reference provided using bowtie2 
 allowing for a maximum fragment length of 1200 (-X 1200)
 
-### Step 3: 
+#### Step 3:
+ 
 The assembly statistics are generated using [weeSAMv1.4](https://github.com/centre-for-virus-research/weeSAM/blob/master/legacy_versions/weeSAMv1.4).
 A newer version of weeSAM is available [here](https://github.com/centre-for-virus-research/weeSAM) 
 if you wish to have more comprehensive statistics.
 A number of assembly statistics are also printed to the terminal.
  
-### Step 4:
+#### Step 4:
+
 The library diversity is also estimated, first using  [SamRemoveIndels.awk](https://github.com/centre-for-virus-research/VATK/blob/master/AssemblyPostProcessing/SamRemoveIndels.awk) 
 and then with [UniqSamPE.awk](https://github.com/centre-for-virus-research/VATK/blob/master/AssemblyPostProcessing/UniqSamPE.awk).
 These provide additional statistics which enable the calculation of the Ratio of total to unique coverage.
@@ -41,5 +45,6 @@ These provide additional statistics which enable the calculation of the Ratio of
 The diversity of genotypes in the sample is also estimated using [MIRNA_SEARCH], 
 which used the signature motifs to determine the number of posible strains in the sample.
 
-### Step 5:
+#### Step 5:
+
 The final stats are printed to output.csv in the input directory.
