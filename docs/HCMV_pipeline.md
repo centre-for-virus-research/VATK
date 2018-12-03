@@ -8,16 +8,17 @@ alignmentStats_ReCVR.sh <input_dir> <ref.fa> <signature.fa> <lib_name>
 ```
 
 **Input**
-<input_dir> is a directory of paired fastq files. The fastq files need to be in a directory 
+
+\<input_dir\> is a directory of paired fastq files. The fastq files need to be in a directory 
 and have the extension \_R1\_001.fastq and \_R2\_001.fastq (or \_R1\_001.fq and \_R2\_001.fq).
 
-<ref.fa> is the name of the reference fasta file (e.g., merlin.fa)
+\<ref.fa\> is the name of the reference fasta file (e.g., merlin.fa)
 
-<signature.fa> is the fasta file with the signatures of different HCMV strains.
+\<signature.fa\> is the fasta file with the signatures of different HCMV strains.
 
-<lib_name> is the name of the reference library when building the bowtie2 index
+\<lib_name\> is the name of the reference library when building the bowtie2 index
 
-###Pipeline
+### Pipeline
 
 #### Step 1:
 
