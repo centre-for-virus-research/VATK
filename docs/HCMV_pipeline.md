@@ -9,15 +9,28 @@ alignmentStats_ReCVR.sh <input_dir> <ref.fa> <signature.fa> <lib_name>
 
 **Input**
 
-\<input_dir\> is a directory of paired fastq files. The fastq files need to be in a directory 
+**\<input_dir\>** is a directory of paired fastq files. The fastq files need to be in a directory 
 and have the extension \_R1\_001.fastq and \_R2\_001.fastq (or \_R1\_001.fq and \_R2\_001.fq).
 
-\<ref.fa\> is the name of the reference fasta file (e.g., merlin.fa)
+**\<ref.fa\>** is the name of the reference fasta file (e.g., merlin.fa)
 
-\<signature.fa\> is the fasta file with the signatures of different HCMV strains.
+**\<signature.fa\>** is the fasta file with the signatures of different HCMV strains.
 
-\<lib_name\> is the name of the reference library when building the bowtie2 index
+**\<lib_name\>** is the name of the reference library when building the bowtie2 index
 
+### Dependencies
+
+[cutadapt](https://cutadapt.readthedocs.io/en/stable/)
+[trim_galore](https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/)
+[bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
+[samtools](https://sourceforge.net/projects/samtools/files/)
+[weeSAMv1.4](https://github.com/centre-for-virus-research/weeSAM/blob/master/legacy_versions/weeSAMv1.4)
+[gawk](https://www.gnu.org/software/gawk/) 
+[SamRemoveIndels.awk](https://github.com/centre-for-virus-research/VATK/blob/master/AssemblyPostProcessing/SamRemoveIndels.awk) - hash-bang may need to be changed depending on your gawk installation
+[UniqSamPE.awk](https://github.com/centre-for-virus-research/VATK/blob/master/AssemblyPostProcessing/UniqSamPE.awk) - hash-bang may need to be changed depending on your gawk installation
+[miRNA_Search](https://github.com/centre-for-virus-research/VATK/tree/master/GenotypingTools)
+ 
+ 
 ### Pipeline
 
 #### Step 1:
@@ -43,7 +56,7 @@ The library diversity is also estimated, first using  [SamRemoveIndels.awk](http
 and then with [UniqSamPE.awk](https://github.com/centre-for-virus-research/VATK/blob/master/AssemblyPostProcessing/UniqSamPE.awk).
 These provide additional statistics which enable the calculation of the Ratio of total to unique coverage.
 
-The diversity of genotypes in the sample is also estimated using [MIRNA_SEARCH], 
+The diversity of genotypes in the sample is also estimated using [miRNA_Search](https://github.com/centre-for-virus-research/VATK/tree/master/GenotypingTools), 
 which used the signature motifs to determine the number of posible strains in the sample.
 
 #### Step 5:

@@ -71,4 +71,4 @@ foreach my $cnt (keys %strain_cnt){
     $max_strain=$cnt;
   }  
 }
-print "Max number of strains is $max_strain\n";
+print "$max_strain\n";
