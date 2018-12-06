@@ -69,6 +69,7 @@ if qualityFiltering == "yes" or qualityFiltering == "Yes":
         qualConfFile.write(confFile.readline())
     qualConfFile.write("SampleEnd*******************************************\n")
     qualConfFile.close()
+    os.system("cp /home3/scc20x/Software/mySoftware/VATK/reference_guided_assembly/HeidiLischer-pipeline/* .")
     os.system("python readsFiltering.py qualityFiltering.conf")
     os.system("mkdir -p 1_cleanReads")
     os.system("mv ./allSamples/"+projectName+"_hq_?.fastq ./1_cleanReads/")
@@ -145,7 +146,7 @@ if superBlocksDenovo == 'yes' or superBlocksDenovo == 'Yes':
 
     superBlocksFile = "../3_blocksAndSuperblocks/superBlocks.txt"
     infile = open(superBlocksFile)
-
+    os.system("samtools index ../2_referenceAlignment/mapped.bam")
     while True:
         interval = infile.readline().rstrip()
         if not interval:
@@ -197,9 +198,9 @@ if superBlocksDenovo == 'yes' or superBlocksDenovo == 'Yes':
     os.system("/home3/scc20x/Software/SPAdes-3.12.0-Linux/bin/spades.py -1 temp_1.fq -2  temp_2.fq -s temp_s.fq --cov-cutoff auto --careful -k 51,61,71 -o unmappedSpades")
 
     #Add the code to collect unmapped paired and unpaired reads from bam/sam file
-    os.system("cat merlinGenome:*/scaffolds.fasta >mergedScaffolds.fasta") #Da modificare con il nome generico
-    if os.path.isfile("./unmappedSpades/scaffolds.fasta")==True:
-        os.system("cat mergedScaffolds.fasta ./unmappedSpades/scaffolds.fasta >temp.fasta; mv temp.fasta  mergedScaffolds.fasta")
+    os.system("cat */scaffolds.fasta >mergedScaffolds.fasta") #Da modificare con il nome generico
+    #if os.path.isfile("./unmappedSpades/scaffolds.fasta")==True:
+    #    os.system("cat mergedScaffolds.fasta ./unmappedSpades/scaffolds.fasta >temp.fasta; mv temp.fasta  mergedScaffolds.fasta")
     os.chdir("..")
 
 #***************************************************************
@@ -280,7 +281,7 @@ if readsCorrection == 'yes' or readsCorrection == 'Yes':
     os.system("samtools faidx mergedSequences.fasta_con.fasta")
     os.system("samtools view -bf 0x2 alignment_sorted2_mapped_filtered.bam | samtools sort - -n | bedtools bamtobed -i - -bedpe | awk '$1 == $4' | cut -f 1,2,6 | sort -k 1,1 | bedtools genomecov -i - -bga -g mergedSequences.fasta_con.fasta.fai  > mergedSequences.fasta_con.fasta_filteredPairedCov.txt")
     os.system("java -jar ../SplitSeqLowCov.jar -i alignment_sorted2_mapped_filtered_Cov.txt -paired mergedSequences.fasta_con.fasta_filteredPairedCov.txt -o mergedSequences.fasta_con.fasta_filteredNotCov.txt -mCov 1 -fasta mergedSequences.fasta_con.fasta -fastaOut mergedSequences.fasta_con.fasta_splitFiltered.fa")
-
+    os.chdir("..")
 #***************************************************************
 #  ********************* gap Closing ***************************
 #***************************************************************
@@ -289,7 +290,7 @@ gapClosing = ((confFile.readline().rstrip()).split("\t"))[1]
 if gapClosing == 'yes' or gapClosing == 'Yes':
     os.system("mkdir 8_GapClosing")
     os.chdir("8_GapClosing")
-    os.system("java -jar ../WriteSoapConfig.jar -insLength 500 -r1 ../1_cleanReads/Saliva01_hq_1.fastq -r2 ../1_cleanReads/Saliva01_hq_2.fastq -max 300 -ru 2 -rank -o soap.config")
+    os.system("java -jar ../WriteSoapConfig.jar -insLength 500 -r1 ../1_cleanReads/"+projectName+"_hq_1.fastq -r2 ../1_cleanReads/"+_hq_1.fastq+"_hq_2.fastq -max 300 -ru 2 -rank -o soap.config")
     os.system("../finalFusion -D -c ../7_readsCorrection/mergedSequences.fasta_con.fasta_splitFiltered.fa -K 61 -g hcmv_61  -p 16")
     os.system("SOAPdenovo-127mer map -s soap.config -g hcmv_61 -p 16")
     os.system("SOAPdenovo-127mer scaff -g hcmv_61 -p 16 -F")
