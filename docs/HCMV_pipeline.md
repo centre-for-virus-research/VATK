@@ -1,3 +1,6 @@
+# VATK
+[Virus Analysis Tool Kit](https://github.com/centre-for-virus-research/VATK)
+
 ## HCMV pipeline
 
 **alignmentStats_ReCVR.sh** is a bash script written to align multiple fastq files
@@ -21,13 +24,21 @@ and have the extension \_R1\_001.fastq and \_R2\_001.fastq (or \_R1\_001.fq and 
 ### Dependencies
 
 [cutadapt](https://cutadapt.readthedocs.io/en/stable/)
+
 [trim_galore](https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/)
+
 [bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
+
 [samtools](https://sourceforge.net/projects/samtools/files/)
+
 [weeSAMv1.4](https://github.com/centre-for-virus-research/weeSAM/blob/master/legacy_versions/weeSAMv1.4)
+
 [gawk](https://www.gnu.org/software/gawk/) 
+
 [SamRemoveIndels.awk](https://github.com/centre-for-virus-research/VATK/blob/master/AssemblyPostProcessing/SamRemoveIndels.awk) - hash-bang may need to be changed depending on your gawk installation
+
 [UniqSamPE.awk](https://github.com/centre-for-virus-research/VATK/blob/master/AssemblyPostProcessing/UniqSamPE.awk) - hash-bang may need to be changed depending on your gawk installation
+
 [miRNA_Search](https://github.com/centre-for-virus-research/VATK/tree/master/GenotypingTools)
  
  
