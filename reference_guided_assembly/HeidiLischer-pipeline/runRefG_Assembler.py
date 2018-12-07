@@ -152,7 +152,7 @@ if superBlocksDenovo == 'yes' or superBlocksDenovo == 'Yes':
         if not interval:
             break
         print "Extracting reads mapping in interval",interval,"...."
-        os.system("samtools view  ../2_referenceAlignment/mapped.bam "+interval + " | cut -f 1 >mappedReadsNames.txt")
+        os.system("samtools view  ../2_referenceAlignment/mapped.bam "+interval + " | cut -f 1 | sort -u >mappedReadsNames.txt")
         mappedReadsFile = open("mappedReadsNames.txt")
         temp1fq = open("temp_1.fq","w")
         temp2fq = open("temp_2.fq","w")
@@ -167,7 +167,9 @@ if superBlocksDenovo == 'yes' or superBlocksDenovo == 'Yes':
         temp2fq.close()
         mappedReadsFile.close()
         os.system("/home3/scc20x/Software/SPAdes-3.12.0-Linux/bin/spades.py -1 temp_1.fq -2  temp_2.fq --cov-cutoff auto --careful -k 51,61,71 -o "+interval)
-    
+ 
+
+
     temp1fq = open("temp_1.fq","w")
     temp2fq = open("temp_2.fq","w")
     tempsfq = open("temp_s.fq","w")
@@ -290,7 +292,7 @@ gapClosing = ((confFile.readline().rstrip()).split("\t"))[1]
 if gapClosing == 'yes' or gapClosing == 'Yes':
     os.system("mkdir 8_GapClosing")
     os.chdir("8_GapClosing")
-    os.system("java -jar ../WriteSoapConfig.jar -insLength 500 -r1 ../1_cleanReads/"+projectName+"_hq_1.fastq -r2 ../1_cleanReads/"+_hq_1.fastq+"_hq_2.fastq -max 300 -ru 2 -rank -o soap.config")
+    os.system("java -jar ../WriteSoapConfig.jar -insLength 500 -r1 ../1_cleanReads/"+projectName+"_hq_1.fastq -r2 ../1_cleanReads/"+projectName+"_hq_2.fastq -max 300 -ru 2 -rank -o soap.config")
     os.system("../finalFusion -D -c ../7_readsCorrection/mergedSequences.fasta_con.fasta_splitFiltered.fa -K 61 -g hcmv_61  -p 16")
     os.system("SOAPdenovo-127mer map -s soap.config -g hcmv_61 -p 16")
     os.system("SOAPdenovo-127mer scaff -g hcmv_61 -p 16 -F")
