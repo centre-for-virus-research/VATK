@@ -166,7 +166,10 @@ if superBlocksDenovo == 'yes' or superBlocksDenovo == 'Yes':
         temp1fq.close()
         temp2fq.close()
         mappedReadsFile.close()
-        os.system("/home3/scc20x/Software/SPAdes-3.12.0-Linux/bin/spades.py -1 temp_1.fq -2  temp_2.fq --cov-cutoff auto --careful -k 51,61,71 -o "+interval)
+        os.system("mv ../getBestAssembly.py ./")
+        os.system("python getBestAssembly.py temp_1.fq temp_2.fq assemblyStats.txt")
+        os.system("mkdir "+interval)
+        os.system("mv scaffolds.fasta ./"+interval)
  
 
 
