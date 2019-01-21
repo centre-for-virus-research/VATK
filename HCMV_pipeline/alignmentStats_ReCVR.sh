@@ -152,7 +152,7 @@ do
   echo "Trimmed and concatenated file: $catFile"
 
   #get the total number of reads 
-  numReads=$(wc -l "$catFile" | cut -d ' ' -f2) 
+  numReads=$(wc -l "$catFile" | cut -d ' ' -f1) 
   totalReads=$((numReads / 4))
   echo "Total Number of Reads $totalReads" 
 
