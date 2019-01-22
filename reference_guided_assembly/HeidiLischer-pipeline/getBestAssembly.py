@@ -36,6 +36,8 @@ for b in range(2):
             longestScaffold += len(line)
             while not line[0] == ">":
                 line = scaffoldsFile.readline()
+                if not line:
+                    break
                 longestScaffold += len(line)
 
             if longestScaffold > bestLength:
