@@ -1,3 +1,8 @@
+#!/usr/bin/python
+installationFolder = "/home3/scc20x/Software/mySoftware/VATK/VirHosFilt"
+
+serverFolder = "/home3/scc20x"
+
 #! /usr/bin/env python
 #  -*- coding: utf-8 -*-
 #
@@ -38,6 +43,9 @@ virusReference = ""
 outputFolder = ""
 
 
+
+
+
 import VirHosFilt_support
 
 
@@ -54,15 +62,17 @@ def exitProgram(event):
 def vp_start_gui():
     '''Starting point when module is the main routine.'''
     global val, w, root
+    global searchUnmappedReads
+
 
     def openInputFolder(event):
-        inputFolder = tkFileDialog.askdirectory(initialdir = "/",title = "Select directory")
+        inputFolder = tkFileDialog.askdirectory(initialdir = "./",title = "Select directory")
         #print inputFolder
         top.Entry1.delete(0,END)
         top.Entry1.insert(0,inputFolder)
 
     def openOutputFolder(event):
-        outputFolder = tkFileDialog.askdirectory(initialdir = "/",title = "Select directory")
+        outputFolder = tkFileDialog.askdirectory(initialdir = "./",title = "Select directory")
         #print outputFolder
         top.Entry1_3.delete(0,END)
         top.Entry1_3.insert(0,outputFolder)
@@ -71,7 +81,7 @@ def vp_start_gui():
         #print top.TCombobox1.get()
         top.Listbox1.delete(0,tk.END)
         if top.TCombobox1.get() == "Select host from server":
-            os.system("ls ./hostsFolderServer/*_virhosfilt >hostlistfile")
+            os.system("ls /home3/scc20x/hostsFolder/*_virhosfilt >hostlistfile")
         else:
             os.system("ls ./hostsFolder/*_virhosfilt >hostlistfile")
         infile = open("hostlistfile")
@@ -88,7 +98,7 @@ def vp_start_gui():
         #print top.TCombobox1.get()
         top.Listbox1_4.delete(0,tk.END)
         if top.TCombobox1_3.get() == "Select virus from server":
-            os.system("ls ./virusFolderServer/*_virhosfilt >hostlistfile")
+            os.system("ls /home3/scc20x/virusFolder/*_virhosfilt >hostlistfile")
         else:
             os.system("ls ./virusFolder/*_virhosfilt >hostlistfile")
         infile = open("hostlistfile")
@@ -135,7 +145,28 @@ def vp_start_gui():
             line2 = (line.split("/"))[-1]
             top.Listbox1_4.insert(tk.END,line2)
         infile.close()
+        listOfItems = top.Listbox1_4.get(0, END)
+        noneIndex= listOfItems.index("none")
+        top.Listbox1_4.selection_set(noneIndex)
         os.system("rm -f hostlistfile")
+
+    def virusSelection(event):
+
+        selectedVirus = top.Listbox1_4.get(ACTIVE)
+        if not selectedVirus=="none":
+            top.UnmappedCheckButton.configure(state=NORMAL)
+            top.RunKrakenCheckButton.configure(state=NORMAL)
+            #top.SearchKimeraCheckButton.configure(state=NORMAL)
+            
+        else:
+            top.UnmappedCheckButton.configure(state=DISABLED)
+            top.RunKrakenCheckButton.configure(state=DISABLED)
+            #top.SearchKimeraCheckButton.configure(state=DISABLED)
+
+
+
+    
+            
 
 
     
@@ -148,16 +179,17 @@ def vp_start_gui():
     def filterReads(event):
 
         inputFolder = top.Entry1.get()
+        outputFolder = top.Entry1_3.get()
 
         if top.TCombobox1_3.get() == "Select virus from server":
-            selectedHost = "./virusFolderServer/"+top.Listbox1_4.get(ACTIVE) #Change when on server
+            selectedVirus = "/home3/scc20x/virusFolder/"+top.Listbox1_4.get(ACTIVE) #Change when on server
         else:
-            selectedHost = "./virusFolder/"+top.Listbox1_4.get(ACTIVE) #Change when on server
+            selectedVirus = "./virusFolder/"+top.Listbox1_4.get(ACTIVE) #Change when on server
 
         if top.TCombobox1.get() == "Select host from server":
-            selectedVirus = "./hostsFolderServer/"+top.Listbox1.get(ACTIVE) #Change when on server
+            selectedHost = "/home3/scc20x/hostsFolder/"+top.Listbox1.get(ACTIVE) #Change when on server
         else:
-            selectedVirus = "./hostsFolder/"+top.Listbox1.get(ACTIVE) #Change when on server
+            selectedHost = "./hostsFolder/"+top.Listbox1.get(ACTIVE) #Change when on server
 
 
         onlyfiles = [f for f in listdir(inputFolder) if isfile(join(inputFolder, f))]
@@ -189,7 +221,16 @@ def vp_start_gui():
                 top.logArea.insert(END, "Mapping reads "+dataset+" to the host reference genome....\n")
                 top.logArea.see(END)
                 top.logArea.configure(state='disabled')
-                os.system("bowtie2 -x "+hostReference+" -1 "+inputFolder+dataset+"_1.fastq -2 "+inputFolder+dataset+"_2.fastq -p 6 -S alignment.sam")
+                top.logArea.update()
+                #if top.chkValueKimera.get() == True:
+                #    os.system("bowtie2 --local -x "+selectedHost+" -1 "+inputFolder+"/"+dataset+"_1.fastq -2 "+inputFolder+"/"+dataset+"_2.fastq -p 8 -S hostAlignment.sam")
+                #else:
+                os.system("bowtie2 --local -x "+selectedHost+" -1 "+inputFolder+"/"+dataset+"_1.fastq -2 "+inputFolder+"/"+dataset+"_2.fastq -p 8 -S hostAlignment.sam")
+                top.logArea.configure(state='normal')
+                top.logArea.insert(END, "Done!\n")
+                top.logArea.see(END)
+                top.logArea.configure(state='disabled')
+                top.logArea.update()
                 step += 1
                 top.progressbar['value']=(int( (step/numStep)*100))
                 top.progressbar.update()
@@ -199,7 +240,13 @@ def vp_start_gui():
                 top.logArea.insert(END, "Converting alignment format for reads "+dataset+" ....\n")
                 top.logArea.see(END)
                 top.logArea.configure(state='disabled')
-                os.system("samtools view -bS -h alignment.sam >alignment.bam") 
+                top.logArea.update()
+                os.system("samtools view -bS -h hostAlignment.sam >hostAlignment.bam") 
+                top.logArea.configure(state='normal')
+                top.logArea.insert(END, "Done!\n")
+                top.logArea.see(END)
+                top.logArea.configure(state='disabled')
+                top.logArea.update()
                 step += 1
                 top.progressbar['value']=int( (step/numStep)*100)
                 top.progressbar.update()
@@ -208,9 +255,16 @@ def vp_start_gui():
                 top.logArea.insert(END, "Extracting unmapped reads for dataset "+dataset+"\n\n")
                 top.logArea.see(END)
                 top.logArea.configure(state='disabled')
-                os.system("bam2fastq --no-aligned --force --strict -o unmapped#.fq alignment.bam")
+                top.logArea.update()
+                os.system("bam2fastq --no-aligned --force --strict -o unmapped#.fq hostAlignment.bam")
+                top.logArea.configure(state='normal')
+                top.logArea.insert(END, "Done!\n")
+                top.logArea.see(END)
+                top.logArea.configure(state='disabled')
+                top.logArea.update()
                 os.system("mv unmapped_1.fq "+outputFolder+"/"+dataset+"_noHost_1.fastq")
                 os.system("mv unmapped_2.fq "+outputFolder+"/"+dataset+"_noHost_2.fastq")
+                os.system("mv hostAlignment.bam "+outputFolder+"/"+dataset+"_hostAlignment.bam")
                 step += 1
                 top.progressbar['value']=int( (step/numStep)*100)
                 top.progressbar.update()
@@ -227,7 +281,17 @@ def vp_start_gui():
                 top.logArea.insert(END, "Mapping reads "+dataset+" to the host reference genome...."+"\n")
                 top.logArea.see(END)
                 top.logArea.configure(state='disabled')
-                os.system("bowtie2 -x "+hostReference+" -U "+inputFolder+dataset+"_1.fastq -p 6 -S alignment.sam")
+                top.logArea.update()
+                #if top.chkValueKimera.get() == True:
+                #    os.system("bowtie2  -local -x "+selectedHost+" -U "+inputFolder+"/"+dataset+"_1.fastq -p 6 -S hostAlignment.sam")
+                #else:
+                os.system("bowtie2 --local -x "+selectedHost+" -U "+inputFolder+"/"+dataset+"_1.fastq -p 6 -S hostAlignment.sam")
+
+                top.logArea.configure(state='normal')
+                top.logArea.insert(END, "Done!\n")
+                top.logArea.see(END)
+                top.logArea.configure(state='disabled')
+                top.logArea.update()
                 step += 1
                 top.progressbar['value']=int( (step/numStep)*100)
                 top.progressbar.update()
@@ -236,7 +300,13 @@ def vp_start_gui():
                 top.logArea.insert(END, "Converting alignment format for reads "+dataset+"...."+"\n")
                 top.logArea.see(END)
                 top.logArea.configure(state='disabled')
-                os.system("samtools view -bS -h alignment.sam >alignment.bam") 
+                top.logArea.update()
+                os.system("samtools view -bS -h hostAlignment.sam >hostAlignment.bam") 
+                top.logArea.configure(state='normal')
+                top.logArea.insert(END, "Done!\n")
+                top.logArea.see(END)
+                top.logArea.configure(state='disabled')
+                top.logArea.update()
                 step += 1
                 top.progressbar['value']=int( (step/numStep)*100)
                 top.progressbar.update()
@@ -245,12 +315,348 @@ def vp_start_gui():
                 top.logArea.insert(END, "Extracting unmapped reads for dataset "+dataset+"\n\n")
                 top.logArea.see(END)
                 top.logArea.configure(state='disabled')
-                os.system("bam2fastq --no-aligned --force --strict -o unmapped#.fq alignment.bam")
+                top.logArea.update()
+                os.system("bam2fastq --no-aligned --force --strict -o unmapped#.fq hostAlignment.bam")
+                top.logArea.configure(state='normal')
+                top.logArea.insert(END, "Done!\n")
+                top.logArea.see(END)
+                top.logArea.configure(state='disabled')
+                top.logArea.update()
                 os.system("mv unmapped_M.fq "+outputFolder+"/"+dataset+"_noHost_1.fastq")
+                os.system("mv hostAlignment.bam "+outputFolder+"/"+dataset+"_hostAlignment.bam")
                 step += 1
                 top.progressbar['value']=int( (step/numStep)*100)
                 top.progressbar.update()
                 time.sleep(1)
+        
+        
+        
+        #If needed align reads to the virus
+
+        if not selectedVirus == "None":
+            top.logArea.configure(state='normal')
+            top.logArea.insert(END, "Mapping host free reads to the virus reference genome"+"\n")
+            top.logArea.see(END)
+            top.logArea.configure(state='disabled')
+            #onlyfiles = [f for f in listdir(outputFolder) if isfile(join(outputFolder, f))]
+            #fileNumber = {}
+            #for item in onlyfiles:
+            #    if not item[:-8] in fileNumber:
+            #        fileNumber[item[:-8]] = 1
+            #    else:
+            #        fileNumber[item[:-8]] += 1
+
+            #paired2filter = []
+            #single2filter = []
+
+            #for files in fileNumber:
+            #    if fileNumber[files]==2:
+            #    if fileNumber[files]==1:
+            ##        paired2filter.append(files)
+            #        single2filter.append(files)
+
+            for dataset in paired2filter:
+                if not dataset[0] ==".":
+                    top.logArea.configure(state='normal')
+                    top.logArea.insert(END, "Mapping reads "+dataset+" to the virus reference genome...."+"\n")
+                    top.logArea.see(END)
+                    top.logArea.configure(state='disabled')
+                    top.logArea.update()
+                    #if top.chkValueKimera.get() == True:
+                    #    os.system("bowtie2 -a --local -x "+selectedVirus+" -1 "+outputFolder+"/"+dataset+"_noHost_1.fastq -2 "+outputFolder+"/"+dataset+"_noHost_2.fastq -p 8 -S virusAlignment.sam")
+                    #else:
+                    os.system("bowtie2 -x "+selectedVirus+" -1 "+outputFolder+"/"+dataset+"_noHost_1.fastq -2 "+outputFolder+"/"+dataset+"_noHost_2.fastq -p 8 -S virusAlignment.sam")
+                    top.logArea.configure(state='normal')
+                    top.logArea.insert(END, "Done!\n")
+                    top.logArea.see(END)
+                    top.logArea.configure(state='disabled')
+                    top.logArea.update()
+                    top.logArea.configure(state='normal')
+                    top.logArea.insert(END, "Converting alignment format for reads "+dataset+"...."+"\n")
+                    top.logArea.see(END)
+                    top.logArea.configure(state='disabled')
+                    top.logArea.update()
+                    os.system("samtools view -bS -h virusAlignment.sam >virusAlignment.bam") 
+                    top.logArea.configure(state='normal')
+                    top.logArea.insert(END, "Done!\n")
+                    top.logArea.see(END)
+                    top.logArea.configure(state='disabled')
+                    top.logArea.update()
+                    top.logArea.configure(state='normal')
+                    top.logArea.insert(END, "Sorting bam file for reads "+dataset+"...."+"\n")
+                    top.logArea.see(END)
+                    top.logArea.configure(state='disabled')
+                    top.logArea.update()
+                    os.system("samtools sort -o virusAlignment_sorted.bam virusAlignment.bam")
+                    top.logArea.configure(state='normal')
+                    top.logArea.insert(END, "Done!\n")
+                    top.logArea.see(END)
+                    top.logArea.configure(state='disabled')
+                    top.logArea.update()
+                    top.logArea.configure(state='normal')
+                    top.logArea.insert(END, "Calculating virus coverage for dataset "+dataset+"\n")
+                    top.logArea.see(END)
+                    top.logArea.configure(state='disabled')
+                    top.logArea.update()
+                    os.system("samtools depth  virusAlignment_sorted.bam >coverage.txt")
+                    top.logArea.configure(state='normal')
+                    top.logArea.insert(END, "Done!\n")
+                    top.logArea.see(END)
+                    top.logArea.configure(state='disabled')
+                    top.logArea.update()
+                    covFile = open("coverage.txt")
+                    position = []
+                    coverage = []
+                    segments = {} 
+                    while True:
+                        line = covFile.readline().rstrip()
+                        if not line:
+                            break
+                        fields = line.split("\t")
+                        if not fields[0] in segments:
+                            segments[fields[0]] = []  
+                        segments[fields[0]].append((int(fields[1]),int(fields[2])))
+
+                    #for segment in segments:
+                    #    position = []
+                    #    coverage = []
+                    #    for item in segments[segment]:
+                    #        position.append(segments[segment][0])
+                    #        coverage.append(segments[segment][1])
+                    #    plt.plot(position,coverage)
+                    #    plt.savefig(dataset+"_"+segment+"_covPlot.png")
+                    #covFile.close()
+                    #os.system("mv *_covPlot.png "+outputFolder+"/")
+                    os.system("mv virusAlignment_sorted.bam "+outputFolder+"/"+dataset+"_virusAlignment.bam")
+                    os.system("rm *.sam *.bam")
+
+
+                    if top.chkValue.get() == True:
+                        top.logArea.configure(state='normal')
+                        top.logArea.insert(END, "Extracting unmapped reads for dataset "+dataset+"...."+"\n")
+                        top.logArea.see(END)
+                        top.logArea.configure(state='disabled')
+                        top.logArea.update()
+                        os.system("samtools view -f 4 -b " +outputFolder+"/"+dataset+"_virusAlignment.bam > unmapped.bam")
+                        top.logArea.configure(state='normal')
+                        top.logArea.insert(END, "Done!\n")
+                        top.logArea.see(END)
+                        top.logArea.configure(state='disabled')
+                        top.logArea.update()
+                       
+                        top.logArea.configure(state='normal')
+                        top.logArea.insert(END, "Converting bam to fastq for unmapped on dataset"+dataset+"...."+"\n")
+                        top.logArea.see(END)
+                        top.logArea.configure(state='disabled')
+                        top.logArea.update()
+                        os.system("bam2fastq -o "+dataset+"_unmapped#.fastq unmapped.bam")
+                        top.logArea.configure(state='normal')
+                        top.logArea.insert(END, "Done!\n")
+                        top.logArea.see(END)
+                        top.logArea.configure(state='disabled')
+                        top.logArea.update()
+
+
+                        os.system("rm -f unmapped.bam")
+                        os.system("mv "+dataset+"_unmapped_?.fastq "+outputFolder+"/")
+
+
+                        if top.chkValueKraken.get()==True:
+                            top.logArea.configure(state='normal')
+                            top.logArea.insert(END, "Performing Kraken Analysis on sample "+dataset+"...."+"\n")
+                            top.logArea.see(END)
+                            top.logArea.configure(state='disabled')
+                            top.logArea.update()
+                            os.system("kraken --db /home2/db/kraken/HumanVirusBacteria/ --output "+dataset+"_krakenOutput.txt --fastq-input "+outputFolder+"/"+dataset+"_unmapped_?.fastq")
+                            os.system("mv "+dataset+"_krakenOutput.txt "+outputFolder+"/")
+                            top.logArea.configure(state='normal')
+                            top.logArea.insert(END, "Done!\n")
+                            top.logArea.see(END)
+                            top.logArea.configure(state='disabled')
+                            top.logArea.update()
+
+
+                    #if top.chkValueKimera.get() == True:
+                    #    top.logArea.configure(state='normal')
+                    #    top.logArea.insert(END, "Extracting single mapped reads in host for dataset",dataset+"...."+"\n")
+                    #    top.logArea.see(END)
+                    #    top.logArea.configure(state='disabled')
+                    #    top.logArea.update()
+                    #    os.system("samtools view -F 4 -f 8 "+outputFolder+"/"+dataset+"_hostAlignment.bam >hostSingleMapped.sam")
+                    #    top.logArea.configure(state='normal')
+                    #    top.logArea.insert(END, "Done!\n")
+                    #    top.logArea.see(END)
+                    #    top.logArea.configure(state='disabled')
+                    #    top.logArea.update()
+                    #    
+                    #    top.logArea.configure(state='normal')
+                    #    top.logArea.insert(END, "Extracting single mapped reads in virus for dataset",dataset+"...."+"\n")
+                    #    top.logArea.see(END)
+                    #    top.logArea.configure(state='disabled')
+                    #    top.logArea.update()
+                    #    os.system("samtools view -F 4 -f 8 "+outputFolder+"/"+dataset+"_virusAlignment.bam >virusSingleMapped.sam")
+                    #    top.logArea.configure(state='normal')
+                    #    top.logArea.insert(END, "Done!\n")
+                    #    top.logArea.see(END)
+                    #    top.logArea.configure(state='disabled')
+                    #    top.logArea.update()
+                    #    
+                    #    top.logArea.configure(state='normal')
+                    #    top.logArea.insert(END, "Searching for chimera reads for dataset",dataset+"...."+"\n")
+                    #    top.logArea.see(END)
+                    #    top.logArea.configure(state='disabled')
+                    #    top.logArea.update()
+                    #    singleReadsHost = {}
+                    #    singleReadsVirus = {}
+                    #    hostsRecord = set()
+                    #    virusRecord = set()
+                    #    singleHostFile = open("hostSingleMapped.sam")
+                    #    singleVirusFile = open("virusSingleMapped.sam")
+                    #    hostReads = {}
+                    #    hostReadsSet = set()
+                    #    
+                    #    while True:
+                    #        line = singleHostFile.readline().rstrip()
+                    #        if not line:
+                    #            break
+                    #        fields = line.split("\t")
+                    #        if "S" in fields[5]:
+                    #            cigarList = fields[5].split("S")
+                    #            if cigarList[0].isdigit() == True:
+                    #                if int(cigarList[0]) >50:
+                    #                    if not fields[0] in hostReads:
+                    #                        hostReads[fields[0]] = (fields[2],fields[3])
+                    #                    hostReadsSet.add(fields[0])
+                    #        if fields[5][-1]=="S":
+                    #            cigarList= fields[5].split("M")
+                    #            if cigarList[-1][:-1].isdigit() == True:
+                    #                if int(cigarList[-1][:-1]) > 50:
+                    #                    if not fields[0] in hostReads:
+                    #                        hostReads[fields[0]] = (fields[2],fields[3])
+                    #                    hostReadsSet.add(fields[0])
+
+                    #    virusReads = {}
+                    #    virusReadsSet = set()
+                    #    while True:
+                    #        line = singleVirusFile.readline().rstrip()
+                    #        if not line:
+                    #            break
+                    #        fields = line.split("\t")
+                    #        if len(fields)>5:
+                    #            if "S" in fields[5]:
+                    #                cigarList = fields[5].split("S")
+                    #                if cigarList[0].isdigit() == True:
+                    #                    if int(cigarList[0]) >50:
+                    #                        if not fields[0] in virusReads:
+                    #                            virusReads[fields[0]] = (fields[2],fields[3])
+                    #                        virusReadsSet.add(fields[0])
+                    #            if fields[5][-1]=="S":
+                    #                cigarList= fields[5].split("M")
+                    #                if cigarList[-1][:-1].isdigit() == True:
+                    #                    if int(cigarList[-1][:-1]) > 50:
+                    #                        if not fields[0] in virusReads:
+                    #                           virusReads[fields[0]] = (fields[2],fields[3])
+                    #                       virusReadsSet.add(fields[0])
+
+                    #    commonReads= hostReadsSet.intersection(virusReadsSet)
+                    #    insPosFile = open(dataset+"_insertions.txt","w")
+                    #    insPosFile.write("ReadsName\tHost_Chromosome\tHost_position\tVirus_Chromosome\tVirus_position\n")
+                    #    for item in commonReads:
+                    #        insPosFile.write(item+"\t"+str(hostReads[item][0])+"\t"+str(hostReads[item][1])+"\t"+str(virusReads[item][0])+str(virusReads[item][0])+"\n")
+                        
+                    #    insPosFile.close()
+                    #    top.logArea.configure(state='normal')
+                    #    os.system("mv "+dataset+"_insertions.txt "+outputFolder+"/")
+                    #    top.logArea.insert(END, "Done!\n")
+                    #    top.logArea.see(END)
+                    #    top.logArea.configure(state='disabled')
+                    #    top.logArea.update()
+
+
+
+
+                        
+
+                            
+
+
+
+
+
+
+            for dataset in single2filter:
+                if not dataset[0] ==".":
+                    top.logArea.configure(state='normal')
+                    top.logArea.insert(END, "Mapping reads "+dataset+" to the host reference genome...."+"\n")
+                    top.logArea.see(END)
+                    top.logArea.configure(state='disabled')
+                    top.logArea.update()
+                    os.system("bowtie2 --local -a -x "+selectedVirus+" -U "+outputFolder+"/"+dataset+"_noHost_1.fastq -p 6 -S virusAlignment.sam")
+                    top.logArea.configure(state='normal')
+                    top.logArea.insert(END, "Converting alignment format for reads "+dataset+"...."+"\n")
+                    top.logArea.see(END)
+                    top.logArea.configure(state='disabled')
+                    top.logArea.update()
+                    os.system("samtools view -bS -h virusAlignment.sam >virusAlignment.bam") 
+                    top.logArea.configure(state='normal')
+                    top.logArea.insert(END, "Sorting bam file for reads "+dataset+"...."+"\n")
+                    top.logArea.see(END)
+                    top.logArea.configure(state='disabled')
+                    top.logArea.update()
+                    os.system("samtools sort -o virusAlignment_sorted.bam virusAlignment.bam")
+                    top.logArea.configure(state='normal')
+                    top.logArea.update()
+                    top.logArea.insert(END, "Calculating virus coverage for dataset "+dataset+"\n")
+                    top.logArea.see(END)
+                    top.logArea.configure(state='disabled')
+                    top.logArea.update()
+                    os.system("samtools depth  virusAlignment_sorted.bam >coverage.txt")
+                    covFile = open("coverage.txt")
+                    position = []
+                    coverage = []
+                    segments = {} 
+                    while True:
+                        line = covFile.readline().rstrip()
+                        if not line:
+                            break
+                        fields = line.split("\t")
+                        if not fields[1] in segments:
+                            segments[fields[1]] = []  
+                        segments[fields[1]].append((int(fields[1]),int(fields[2])))
+
+                    #for segment in segments:
+                    #    position = []
+                    #    coverage = []
+                    #    for item in segments[segment]:
+                    #        position.append(segments[segment][0])
+                    #        coverage.append(segments[segment][1])
+                    #    plt.plot(position,coverage)
+                    #    plt.savefig(dataset+"_"+segment+"_covPlot.png")
+                    
+                    #covFile.close()
+                    #os.system("mv *_covPlot.png "+outputFolder+"/")
+                    os.system("mv virusAlignment_sorted.bam "+outputFolder+"/"+dataset+"_virusAlignment.bam")
+                    os.system("rm *.sam *.bam")
+
+
+                    if top.chkValue.get() == True:
+                        print "Extracting unmapped from dataset ",dataset
+                        os.system("samtools view -f 4 -b " +outputFolder+"/"+dataset+"_virusAlignment.bam >unmapped.bam")
+                        print "Converting bam to fastq for unmapped on dataset",dataset
+                        os.system("bam2fastq -o "+dataset+"_unmapped#.fastq unmapped.bam")
+                        os.system("rm -f unmapped.bam")
+                        os.system("mv "+dataset+"_unmapped_?.fastq "+outputFolder+"/")
+
+                        if top.chkValueKraken.get()==True:
+                            print "Performing Kraken Analysis on sample",dataset
+                            os.system("kraken --db /home2/db/kraken/HumanVirusBacteria/ --output "+dataset+"_krakenOutput.txt --fastq-input "+outputFolder+"/"+dataset+"_unmapped_?.fastq")
+                            os.system("mv "+dataset+"_krakenOutput.txt "+outputFolder+"/")
+
+
+
+
+
+
 
 #*******************************************************
 #********************* Main algorithm end **************
@@ -290,6 +696,8 @@ def vp_start_gui():
     top.Button2_5.bind('<Button-1>' ,filterReads)
     top.addHostButton.bind('<Button-1>' ,addHostGenome)
     top.Button1_4.bind('<Button-1>' ,addVirusGenome)
+    top.Listbox1_4.bind('<Motion>',virusSelection)
+    
 
     
     
@@ -297,9 +705,9 @@ def vp_start_gui():
 
     #*********** Initialise hosts list ****************
     if top.TCombobox1.get() == "Select host from server":
-        os.system("ls ./hostsFolderServer/*_virhosfilt >hostlistfile")
+        os.system("ls "+serverFolder+"/hostsFolder/*_virhosfilt >hostlistfile")
     else:
-        os.system("ls ./hostsFolder/*_virhosfilt >hostlistfile")
+        os.system("ls "+installationFolder+"/hostsFolder/*_virhosfilt >hostlistfile")
     infile = open("hostlistfile")
     while True:
         line = ((infile.readline().rstrip()).split("_virhosfilt"))[0]
@@ -313,9 +721,9 @@ def vp_start_gui():
 
     #*********** Initialise virus list ****************
     if top.TCombobox1_3.get() == "Select virus from server":
-        os.system("ls ./virusFolderServer/*_virhosfilt >hostlistfile")
+        os.system("ls "+serverFolder+"/virusFolder/*_virhosfilt >hostlistfile")
     else:
-        os.system("ls ./virusFolder/*_virhosfilt >hostlistfile")
+        os.system("ls "+installationFolder+"/virusFolder/*_virhosfilt >hostlistfile")
     infile = open("hostlistfile")
     while True:
         line = ((infile.readline().rstrip()).split("_virhosfilt"))[0]
@@ -324,6 +732,9 @@ def vp_start_gui():
         line2 = (line.split("/"))[-1]
         top.Listbox1_4.insert(tk.END,line2)
     infile.close()
+    listOfItems = top.Listbox1_4.get(0, END)
+    noneIndex= listOfItems.index("none")
+    top.Listbox1_4.selection_set(noneIndex)
     os.system("rm -f hostlistfile")
 
 
@@ -353,10 +764,18 @@ def destroy_Toplevel1():
 class Toplevel1:
     def __init__(self, top=None):
         
-        
+        def selectKraken(event):
+            if self.chkValue.get() == False:
+                self.RunKrakenCheckButton.configure(state=NORMAL)
+                searchUnmappedReads = True
+            else:
+                self.RunKrakenCheckButton.configure(state=DISABLED)
+                searchUnmappedReads = False
+            print searchUnmappedReads
+
 
         
-
+        
 
         '''This class configures and populates the toplevel window.
            top is the toplevel containing window.'''
@@ -378,7 +797,7 @@ class Toplevel1:
         top.title("VirHosFilt")
         top.configure(highlightcolor="black")
 
-        self.progressbar=ttk.Progressbar(top,orient="horizontal",length=920,mode="determinate")
+        self.progressbar=ttk.Progressbar(top,orient="horizontal",length=720,mode="determinate")
         self.progressbar.place(x=20,y=430)
         self.progressbar['maximum'] = 100
 
@@ -442,6 +861,7 @@ class Toplevel1:
         self.Listbox1_4.configure(font="TkFixedFont")
         self.Listbox1_4.configure(selectbackground="#c4c4c4")
         self.Listbox1_4.configure(width=214)
+        
 
         self.Button1_1 = tk.Button(top)
         self.Button1_1.place(x=810, y=40, height=30, width=120)
@@ -486,15 +906,43 @@ class Toplevel1:
         self.Label3.configure(activebackground="#f9f9f9")
         self.Label3.configure(text='''Log windows''')
 
+        self.chkValue = tk.BooleanVar() 
+        self.chkValue.set(True)
+        self.UnmappedCheckButton = tk.Checkbutton(top,state=DISABLED,variable=self.chkValue)
+        self.UnmappedCheckButton.place(x=730,y=300,height=20,width=200)
+        self.UnmappedCheckButton.configure(text="Report unmapped reads")
+        self.UnmappedCheckButton.bind('<Button-1>',selectKraken)
+
+        self.chkValueKraken = tk.BooleanVar() 
+        self.chkValueKraken.set(True)
+        self.RunKrakenCheckButton = tk.Checkbutton(top,state=DISABLED,variable=self.chkValueKraken)
+        self.RunKrakenCheckButton.place(x=735,y=330,height=20,width=200)
+        self.RunKrakenCheckButton.configure(text="Run Kraken on unmapped")
+
+        self.threadsEntry = tk.Entry(top,justify="right")
+        self.threadsEntry.place(x=745,y=390,height=30,width=50)
+        self.threadsEntry.insert(0,"8")
+
+        self.threadsLabel = tk.Label(top)
+        self.threadsLabel.place(x=800,y=400,height=20,width=130)
+        self.threadsLabel.configure(text="Number of threads")
+
+        #self.chkValueKimera = tk.BooleanVar() 
+        #self.chkValueKimera.set(True)
+        #self.SearchKimeraCheckButton = tk.Checkbutton(top,state=DISABLED,variable=self.chkValueKimera)
+        #self.SearchKimeraCheckButton.place(x=740,y=360,height=20,width=200)
+        #self.SearchKimeraCheckButton.configure(text="Search Chimera Fragments")
+
+
 
         self.Frame1 = tk.Frame(top)
-        self.Frame1.place(x=20, y=300, height=120, width=920)
+        self.Frame1.place(x=20, y=300, height=120, width=720)
         self.Frame1.configure(relief='groove')
         self.Frame1.configure(borderwidth="2")
         self.Frame1.configure(relief='groove')
         self.Frame1.configure(width=125)
         self.logArea = tk.Text(top)#,state='disabled')
-        self.logArea.place(x=25,y=305,height=110, width=910)
+        self.logArea.place(x=25,y=305,height=110, width=710)
         self.logArea.configure(background="white",borderwidth=5)
         self.logArea.configure(selectbackground="#c4c4c4")
         #self.logArea.configure(highlightbackground="Black")
