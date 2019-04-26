@@ -2,6 +2,7 @@
 [Virus Analysis Tool Kit](https://github.com/centre-for-virus-research/VATK)
 
 
+
 1. Evaluating your raw sequencing data
   * counting sequences: fastq and fastq.gz
   * quality assurance: FASTQC and samstats
