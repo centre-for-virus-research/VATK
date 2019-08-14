@@ -1,0 +1,29 @@
+Post-alignment analysis
+=======================
+
+
+
+Detecting chimeras
+##################
+
+
+
+Coverage smoothing
+##################
+
+
+
+
+Further contamination removal
+#############################
+
+
+
+
+Counting and removing duplicates
+################################
+
+
+Realignment around indels
+#########################
+
