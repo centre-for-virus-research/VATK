@@ -3,4 +3,6 @@
 *.fastq
 *.fq
 *.sai
-
+.DS_Store
+._.DS_Store
+._VirHosFilt documentation.docx
