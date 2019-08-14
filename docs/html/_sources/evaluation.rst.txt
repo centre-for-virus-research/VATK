@@ -1,0 +1,18 @@
+***************************
+Evaluation of sequence data
+***************************
+
+   
+Counting sequences
+##################
+
+
+
+Checking sequence quality
+#########################
+
+
+
+Complexity of the sequencing data
+#################################
+

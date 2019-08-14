@@ -1,0 +1,118 @@
+Trimming
+========
+
+Sequencing data are usually provided as raw reads in the FASTQ format, 
+which usually require 
+pre-processing prior to further analysis. 
+Sequences often carry particular sequence oligonucleotides, These may have been 
+introduced by experimental design (e.g., sample barcodes), be specific to a sequencing 
+platform (e.g., adapter sequences) or be a real biological signal (e.g., spliced leader).
+The most used pre-processing step 
+involves read trimming which:
+
+1. Trims adaptors and primers from reads
+2. Filters on base qualities, in different ways depending on the program
+
+It is important to trim and remove adaptors to avoid issues in downstream analyses such as 
+in transcriptomics :cite:`Williams2016`, variant analysis 
+or de novo assembly. 
+
+There are many tools that have been developed for this purpose and an extensive 
+list of them are presented below. Each has its own advantage and some of them have already been benchmarked :cite:`DelFabbro2013`. 
+Here tools for trimming and adaptor removal will be benchmarked 
+in the context of consensus calling and variant calling for viral genomes. 
+Duplicate removal and contaminant sequence filtering will be covered elsewhere.
+
+
+
+Tools
+#####
+
+.. list-table:: Trimming programs
+   :widths: 33 33 34
+   :header-rows: 1
+   
+   * - Name
+     - Website
+     - Publication
+   * - Btrim
+     - http://graphics.med.yale.edu/trim/
+     - :cite:`Kong2011`
+   * - ConDeTri
+     - https://github.com/linneas/condetri
+     - :cite:`Smeds2011`
+   * - Cutadapt
+     - https://cutadapt.readthedocs.io/en/stable/
+     - :cite:`EJ200`
+   * - FASTX
+     - http://hannonlab.cshl.edu/fastx_toolkit/
+     - N/A
+   * - Flexbar
+     - https://github.com/seqan/flexbar/wiki/Manual
+     - :cite:`Dodt2012`
+   * - PRINSEQ
+     - http://prinseq.sourceforge.net/index.html
+     - :cite:`Schmieder2011`
+   * - SolexaQA + DynamicTrim
+     - http://solexaqa.sourceforge.net/
+     - :cite:`Cox2010`
+   * - Scythe
+     - https://github.com/vsbuffalo/scythe
+     - N/A
+   * - Seqtk
+     - https://github.com/lh3/seqtk
+     - N/A
+   * - Sickle
+     - https://github.com/najoshi/sickle
+     - N/A
+   * - TagDust2
+     - http://tagdust.sourceforge.net/
+     - :cite:`Lassmann2015`
+   * - Trimmomatic
+     - http://www.usadellab.org/cms/index.php?page=trimmomatic
+     - :cite:`Bolger2014`
+   * - Atropos
+     - https://github.com/jdidion/atropos
+     - :cite:`Didion2017`
+   * - fastp
+     - https://github.com/OpenGene/fastp
+     - :cite:`Chen2018`
+   * - FastqPuri
+     - https://github.com/jengelmann/FastqPuri
+     - :cite:`Perez-Rubio2019`
+   * - ea-utils 
+     - https://expressionanalysis.github.io/ea-utils/
+     - :cite:`Aronesty2013` 
+     
+     
+
+
+Benchmark
+#########
+
+Benchmark by time, memory usage
+
+Btrim:
+trim low quality at both or either ends, identify barcodes, handle indels in adapters and barcodes
+
+ConDeTri:
+single and paired end of different sequence length independent from user 
+interaction, trim and remove reads with low quality scores.
+
+Cutadapt:
+
+FASTX:
+
+Flexbar:
+Can do color-space reads (454), maintains read pairing and separates barcode reads.
+
+PRINSEQ
+
+
+SolexaQA
+
+
+
+.. bibliography:: trimrefs.bib
+   :style: plain
+
