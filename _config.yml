@@ -1,2 +1,3 @@
 theme: jekyll-theme-minimal
-include: html/_static
+include: docs/html/_static
+include: docs/html/_sources
