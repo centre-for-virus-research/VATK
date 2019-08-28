@@ -36,6 +36,7 @@
             
   <div class="section" id="post-alignment-analysis">
 <h1>Post-alignment analysis<a class="headerlink" href="#post-alignment-analysis" title="Permalink to this headline">¶</a></h1>
+<p>Once a SAM/BAM has been generated, a number of post-processing steps can be undertaken.</p>
 <div class="section" id="detecting-chimeras">
 <h2>Detecting chimeras<a class="headerlink" href="#detecting-chimeras" title="Permalink to this headline">¶</a></h2>
 </div>
@@ -50,6 +51,24 @@
 </div>
 <div class="section" id="realignment-around-indels">
 <h2>Realignment around indels<a class="headerlink" href="#realignment-around-indels" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="removing-reads-with-indels">
+<h2>Removing reads with indels<a class="headerlink" href="#removing-reads-with-indels" title="Permalink to this headline">¶</a></h2>
+<p><a href="#id1"><span class="problematic" id="id2">`SamRemoveIndels https://github.com/centre-for-virus-research/VATK/blob/master/AssemblyPostProcessing/SamRemoveIndels.awk`_</span></a> is an awk script
+which is used in the HCMV pipeline to remove reads with indels from a SAM file.</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">SamRemoveIndels</span> <span class="pre">samfile.sam</span> <span class="pre">&gt;</span> <span class="pre">samfile_with_without_indels.sam</span>
+<span class="pre">`</span></code></p>
+</div>
+<div class="section" id="remove-the-duplicate-fragments">
+<h2>Remove the duplicate fragments<a class="headerlink" href="#remove-the-duplicate-fragments" title="Permalink to this headline">¶</a></h2>
+<p><a href="#id3"><span class="problematic" id="id4">`UniqSamPE https://github.com/centre-for-virus-research/VATK/blob/master/AssemblyPostProcessing/UniqSamPE.awk`_</span></a> is awk script
+to remove duplicate paired-end fragments that start and end at the exact same position. This script is used in the HCMV pipeline to
+measure the level of clonality in a given alignment, i.e, it remove reads lacking unique
+fragment coordinates.</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">UniqSamPE.awk</span> <span class="pre">samfile.sam</span> <span class="pre">&gt;</span> <span class="pre">samfile_with_unique_reads.sam</span>
+<span class="pre">`</span></code></p>
 </div>
 </div>
 
@@ -74,6 +93,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="evaluation.html">Evaluation of sequence data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trimming.html">Trimming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="duplicate.html">Pre-assembly duplicate removal</a></li>
 <li class="toctree-l1"><a class="reference internal" href="referenceselection.html">Reference selection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alignment.html">Alignment/mapping</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Post-alignment analysis</a><ul>
@@ -82,6 +102,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#further-contamination-removal">Further contamination removal</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#counting-and-removing-duplicates">Counting and removing duplicates</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#realignment-around-indels">Realignment around indels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#removing-reads-with-indels">Removing reads with indels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#remove-the-duplicate-fragments">Remove the duplicate fragments</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="reportingstats.html">Reporting alignment stats</a></li>

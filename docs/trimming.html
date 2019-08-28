@@ -58,8 +58,8 @@ in the context of consensus calling and variant calling for viral genomes.
 Duplicate removal and contaminant sequence filtering will be covered elsewhere.</p>
 <div class="section" id="tools">
 <h2>Tools<a class="headerlink" href="#tools" title="Permalink to this headline">¶</a></h2>
-<table border="1" class="colwidths-given docutils" id="id15">
-<caption><span class="caption-text">Trimming programs</span><a class="headerlink" href="#id15" title="Permalink to this table">¶</a></caption>
+<table border="1" class="colwidths-given docutils" id="id17">
+<caption><span class="caption-text">Trimming programs</span><a class="headerlink" href="#id17" title="Permalink to this table">¶</a></caption>
 <colgroup>
 <col width="33%" />
 <col width="33%" />
@@ -136,22 +136,112 @@ Duplicate removal and contaminant sequence filtering will be covered elsewhere.<
 <td><a class="reference external" href="https://expressionanalysis.github.io/ea-utils/">https://expressionanalysis.github.io/ea-utils/</a></td>
 <td><a class="reference internal" href="#aronesty2013" id="id14">[1]</a></td>
 </tr>
+<tr class="row-even"><td>TrimGalore</td>
+<td><a class="reference external" href="https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/">https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/</a></td>
+<td>N/A</td>
+</tr>
 </tbody>
 </table>
 </div>
 <div class="section" id="benchmark">
 <h2>Benchmark<a class="headerlink" href="#benchmark" title="Permalink to this headline">¶</a></h2>
 <p>Benchmark by time, memory usage</p>
-<p>Btrim:
-trim low quality at both or either ends, identify barcodes, handle indels in adapters and barcodes</p>
+<p>Btrim:</p>
+<p>Trims low quality at both or either ends of a fastq sequence, identify barcodes,
+handle indels in adapters and barcodes. The adaptors are provided as a 6 column text-tab delimited
+file where the user can specify which region in the sequence to search for adaptors in.
+To trim Illumina adaptor AGATCGGAAGAGC with a window size of 10 and a cutoff for average
+quality scores within the moving window for quality trimming of 25, where only 3’-end trimming is
+carried out, keeping a minimal length sequence of 40:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>btrim64 -w <span class="m">10</span> -a <span class="m">25</span> -p illumina_adapter.txt -3 -P -o output.fastq -l <span class="m">40</span> -t &lt;<span class="o">(</span>gunzip -c path_to_your_fastq/*.gz <span class="o">)</span> -C -z
+</pre></div>
+</div>
+<p>The disadvantage is that it does not deal directly with paired-end reads, so the individual
+files need to be trimmed first and then the perl script paired_end_trim.pl is used
+to create the files where both ends passed the trimming. Another two files (<a href="#id15"><span class="problematic" id="id16">*</span></a>.se) are
+generated for the reads where only one end passed the trimming.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>btrim64 -a <span class="m">25</span> -q -t input_R1.fq -o output_R1.25 -s output_R1.sum25
+btrim64 -a <span class="m">25</span> -q -t input_R1.fq -o output_R2.25 -s output_R2.sum25
+paired_end_trim.pl output_R1.sum25 output_21.sum25 output_R1.25 output_R2.25
+</pre></div>
+</div>
+<p>Works directly on .gz files. Provides total sequence count and length distribution.</p>
+<p>/usr/bin/time -f “%Sn%U”
+btrim/btrim64 -q -s Rana-01_R1.s -o Rana-01_R1.btrim64 -t ~/Documents/VirusAssemblathon/Ranavirus/Rana-01_S1_L001_R1_001.fastq.gz
+btrim/btrim64 -q -s Rana-01_R2.s -o Rana-01_R2.btrim64 -t ~/Documents/VirusAssemblathon/Ranavirus/Rana-01_S1_L001_R2_001.fastq.gz &gt; Rana-01_R2.stdout
+btrim/paired_end_trim.pl Rana-01_R1.s Rana-01_R2.s Rana-01_R1.btrim64 Rana-01_R2.btrim64</p>
+<p>Time: 3.35user 1.01system 0:05.33elapsed 81%CPU</p>
+<p>Default:
+maximum number of errors in 5’-adaptor [default=3]
+maximum number of errors in 3’-adaptor [default=4]
+minimal insert size [default=25]
+size of moving window for quality trimming [default=5]
+cutoff for average quality scores within the moving window for quality trimming [default=15]</p>
+<p>Disadvantages: Dealing with paired-end reads is a two step process.</p>
 <p>ConDeTri:
 single and paired end of different sequence length independent from user
 interaction, trim and remove reads with low quality scores.</p>
+<p>Default: Settings: HQ=25 LQ=10 Frac=0.8 Lfrac=0 MH=5 ML=1 Minlen=50 Scoring=33
+Hiqh quality threshold [25].
+Low quality threshold [10].
+Fraction of read that must exceed hq [0.8].
+Min allowed read length [50].
+When this no of sequential hq bases is reached, the trimming stops [5].
+Max no of lq bases allowed after a stretch of hq bases from 3’-end [1].</p>
+<p>./condetri/condetri.pl -sc=33 -fastq1= -fastq2= -prefix=</p>
+<p>Seemed very very slow</p>
 <p>Cutadapt:</p>
+<blockquote>
+<div><table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--quality-base <var>N</var></span></kbd></td>
+</tr>
+<tr><td>&#160;</td><td>Assume that quality values in FASTQ are encoded as
+ascii(quality + N). This needs to be set to 64 for
+some old Illumina FASTQ files. Default: 33</td></tr>
+</tbody>
+</table>
+<dl class="docutils">
+<dt>-m LEN[:LEN2], –minimum-length LEN[:LEN2]</dt>
+<dd><blockquote class="first">
+<div>Discard reads shorter than LEN. Default: 0</div></blockquote>
+<p class="last">cutadapt -a ADAPT1 -A ADAPT2 [options] -o out1.fastq -p out2.fastq in1.fastq in2.fastq</p>
+</dd>
+</dl>
+</div></blockquote>
 <p>FASTX:</p>
+<blockquote>
+<div><p>$ fastx_trimmer -h
+usage: fastx_trimmer [-h] [-f N] [-l N] [-z] [-v] [-i INFILE] [-o OUTFILE]</p>
+<dl class="docutils">
+<dt>version 0.0.6</dt>
+<dd>[-h]         = This helpful help screen.
+[-f N]       = First base to keep. Default is 1 (=first base).
+[-l N]       = Last base to keep. Default is entire read.
+[-z]         = Compress output with GZIP.
+[-i INFILE]  = FASTA/Q input file. default is STDIN.
+[-o OUTFILE] = FASTA/Q output file. default is STDOUT.</dd>
+</dl>
+</div></blockquote>
 <p>Flexbar:
 Can do color-space reads (454), maintains read pairing and separates barcode reads.</p>
-<p>PRINSEQ</p>
+<p>The program Flexbar preprocesses high-throughput sequencing data efficiently. It
+demultiplexes barcoded runs and removes adapter sequences. Several adapter removal presets
+for Illumina libraries are included. Flexbar computes exact overlap alignments using SIMD
+and multicore parallelism. Moreover, trimming and filtering features are provided, e.g.
+trimming of homopolymers at read ends. Flexbar increases read mapping rates and improves
+genome as well as transcriptome assemblies. Unique molecular identifiers can be extracted
+in a flexible way. The software supports data in fasta and fastq format from multiple
+sequencing platforms</p>
+<p>PRINSEQ
+PRINSEQ-lite 0.20.4
+Lots of different graph outputs.</p>
+<p>perl prinseq-lite.pl -verbose -fastq test_1.fq -fastq2 test_2.fq -ns_max_n 0 -out_good test_no_ns -out_bad test_with_ns
+Singletons will automatically be filtered and stored in separate files (here test_no_ns_1_singletons.fastq and test_no_ns_2_singletons.fastq) in addition to the files test_no_ns_1.fastq, test_no_ns_2.fastq, test_with_ns_1.fastq, and test_with_ns_2.fastq.</p>
+<p>No direct way of dealing with paired end that are zipped.</p>
 <p>SolexaQA</p>
 <p id="bibtex-bibliography-trimming-0"><table class="docutils citation" frame="void" id="aronesty2013" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
