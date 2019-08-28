@@ -1,0 +1,325 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Trimming &#8212; VATK 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Pre-assembly duplicate removal" href="duplicate.html" />
+    <link rel="prev" title="Evaluation of sequence data" href="evaluation.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="trimming">
+<h1>Trimming<a class="headerlink" href="#trimming" title="Permalink to this headline">¶</a></h1>
+<p>Sequencing data are usually provided as raw reads in the FASTQ format,
+which usually require
+pre-processing prior to further analysis.
+Sequences often carry particular sequence oligonucleotides, These may have been
+introduced by experimental design (e.g., sample barcodes), be specific to a sequencing
+platform (e.g., adapter sequences) or be a real biological signal (e.g., spliced leader).
+The most used pre-processing step
+involves read trimming which:</p>
+<ol class="arabic simple">
+<li>Trims adaptors and primers from reads</li>
+<li>Filters on base qualities, in different ways depending on the program</li>
+</ol>
+<p>It is important to trim and remove adaptors to avoid issues in downstream analyses such as
+in transcriptomics <a class="reference internal" href="#williams2016" id="id1">[14]</a>, variant analysis
+or de novo assembly.</p>
+<p>There are many tools that have been developed for this purpose and an extensive
+list of them are presented below. Each has its own advantage and some of them have already been benchmarked <a class="reference internal" href="#delfabbro2013" id="id2">[5]</a>.
+Here tools for trimming and adaptor removal will be benchmarked
+in the context of consensus calling and variant calling for viral genomes.
+Duplicate removal and contaminant sequence filtering will be covered elsewhere.</p>
+<div class="section" id="tools">
+<h2>Tools<a class="headerlink" href="#tools" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="colwidths-given docutils" id="id15">
+<caption><span class="caption-text">Trimming programs</span><a class="headerlink" href="#id15" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="34%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Name</th>
+<th class="head">Website</th>
+<th class="head">Publication</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Btrim</td>
+<td><a class="reference external" href="http://graphics.med.yale.edu/trim/">http://graphics.med.yale.edu/trim/</a></td>
+<td><a class="reference internal" href="#kong2011" id="id3">[8]</a></td>
+</tr>
+<tr class="row-odd"><td>ConDeTri</td>
+<td><a class="reference external" href="https://github.com/linneas/condetri">https://github.com/linneas/condetri</a></td>
+<td><a class="reference internal" href="#smeds2011" id="id4">[13]</a></td>
+</tr>
+<tr class="row-even"><td>Cutadapt</td>
+<td><a class="reference external" href="https://cutadapt.readthedocs.io/en/stable/">https://cutadapt.readthedocs.io/en/stable/</a></td>
+<td><a class="reference internal" href="#ej200" id="id5">[10]</a></td>
+</tr>
+<tr class="row-odd"><td>FASTX</td>
+<td><a class="reference external" href="http://hannonlab.cshl.edu/fastx_toolkit/">http://hannonlab.cshl.edu/fastx_toolkit/</a></td>
+<td>N/A</td>
+</tr>
+<tr class="row-even"><td>Flexbar</td>
+<td><a class="reference external" href="https://github.com/seqan/flexbar/wiki/Manual">https://github.com/seqan/flexbar/wiki/Manual</a></td>
+<td><a class="reference internal" href="#dodt2012" id="id6">[7]</a></td>
+</tr>
+<tr class="row-odd"><td>PRINSEQ</td>
+<td><a class="reference external" href="http://prinseq.sourceforge.net/index.html">http://prinseq.sourceforge.net/index.html</a></td>
+<td><a class="reference internal" href="#schmieder2011" id="id7">[12]</a></td>
+</tr>
+<tr class="row-even"><td>SolexaQA + DynamicTrim</td>
+<td><a class="reference external" href="http://solexaqa.sourceforge.net/">http://solexaqa.sourceforge.net/</a></td>
+<td><a class="reference internal" href="#cox2010" id="id8">[4]</a></td>
+</tr>
+<tr class="row-odd"><td>Scythe</td>
+<td><a class="reference external" href="https://github.com/vsbuffalo/scythe">https://github.com/vsbuffalo/scythe</a></td>
+<td>N/A</td>
+</tr>
+<tr class="row-even"><td>Seqtk</td>
+<td><a class="reference external" href="https://github.com/lh3/seqtk">https://github.com/lh3/seqtk</a></td>
+<td>N/A</td>
+</tr>
+<tr class="row-odd"><td>Sickle</td>
+<td><a class="reference external" href="https://github.com/najoshi/sickle">https://github.com/najoshi/sickle</a></td>
+<td>N/A</td>
+</tr>
+<tr class="row-even"><td>TagDust2</td>
+<td><a class="reference external" href="http://tagdust.sourceforge.net/">http://tagdust.sourceforge.net/</a></td>
+<td><a class="reference internal" href="#lassmann2015" id="id9">[9]</a></td>
+</tr>
+<tr class="row-odd"><td>Trimmomatic</td>
+<td><a class="reference external" href="http://www.usadellab.org/cms/index.php?page=trimmomatic">http://www.usadellab.org/cms/index.php?page=trimmomatic</a></td>
+<td><a class="reference internal" href="#bolger2014" id="id10">[2]</a></td>
+</tr>
+<tr class="row-even"><td>Atropos</td>
+<td><a class="reference external" href="https://github.com/jdidion/atropos">https://github.com/jdidion/atropos</a></td>
+<td><a class="reference internal" href="#didion2017" id="id11">[6]</a></td>
+</tr>
+<tr class="row-odd"><td>fastp</td>
+<td><a class="reference external" href="https://github.com/OpenGene/fastp">https://github.com/OpenGene/fastp</a></td>
+<td><a class="reference internal" href="#chen2018" id="id12">[3]</a></td>
+</tr>
+<tr class="row-even"><td>FastqPuri</td>
+<td><a class="reference external" href="https://github.com/jengelmann/FastqPuri">https://github.com/jengelmann/FastqPuri</a></td>
+<td><a class="reference internal" href="#perez-rubio2019" id="id13">[11]</a></td>
+</tr>
+<tr class="row-odd"><td>ea-utils</td>
+<td><a class="reference external" href="https://expressionanalysis.github.io/ea-utils/">https://expressionanalysis.github.io/ea-utils/</a></td>
+<td><a class="reference internal" href="#aronesty2013" id="id14">[1]</a></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="benchmark">
+<h2>Benchmark<a class="headerlink" href="#benchmark" title="Permalink to this headline">¶</a></h2>
+<p>Benchmark by time, memory usage</p>
+<p>Btrim:
+trim low quality at both or either ends, identify barcodes, handle indels in adapters and barcodes</p>
+<p>ConDeTri:
+single and paired end of different sequence length independent from user
+interaction, trim and remove reads with low quality scores.</p>
+<p>Cutadapt:</p>
+<p>FASTX:</p>
+<p>Flexbar:
+Can do color-space reads (454), maintains read pairing and separates barcode reads.</p>
+<p>PRINSEQ</p>
+<p>SolexaQA</p>
+<p id="bibtex-bibliography-trimming-0"><table class="docutils citation" frame="void" id="aronesty2013" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id14">[1]</a></td><td>E&nbsp;Aronesty. Comparison of sequencing utility programs. open bioinforma j 7: 1–8. 2013.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="bolger2014" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id10">[2]</a></td><td>Anthony&nbsp;M Bolger, Marc Lohse, and Bjoern Usadel. Trimmomatic: a flexible trimmer for illumina sequence data. <em>Bioinformatics (Oxford, England)</em>, 30:2114–2120, August 2014. <a class="reference external" href="https://doi.org/10.1093/bioinformatics/btu170">doi:10.1093/bioinformatics/btu170</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="chen2018" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id12">[3]</a></td><td>Shifu Chen, Yanqing Zhou, Yaru Chen, and Jia Gu. Fastp: an ultra-fast all-in-one fastq preprocessor. <em>Bioinformatics (Oxford, England)</em>, 34:i884–i890, September 2018. <a class="reference external" href="https://doi.org/10.1093/bioinformatics/bty560">doi:10.1093/bioinformatics/bty560</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="cox2010" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id8">[4]</a></td><td>Murray&nbsp;P Cox, Daniel&nbsp;A Peterson, and Patrick&nbsp;J Biggs. Solexaqa: at-a-glance quality assessment of illumina second-generation sequencing data. <em>BMC bioinformatics</em>, 11:485, September 2010. <a class="reference external" href="https://doi.org/10.1186/1471-2105-11-485">doi:10.1186/1471-2105-11-485</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="delfabbro2013" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[5]</a></td><td>Cristian Del&nbsp;Fabbro, Simone Scalabrin, Michele Morgante, and Federico&nbsp;M Giorgi. An extensive evaluation of read trimming effects on illumina ngs data analysis. <em>PloS one</em>, 8:e85024, 2013. <a class="reference external" href="https://doi.org/10.1371/journal.pone.0085024">doi:10.1371/journal.pone.0085024</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="didion2017" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id11">[6]</a></td><td>John&nbsp;P Didion, Marcel Martin, and Francis&nbsp;S Collins. Atropos: specific, sensitive, and speedy trimming of sequencing reads. <em>PeerJ</em>, 5:e3720, 2017. <a class="reference external" href="https://doi.org/10.7717/peerj.3720">doi:10.7717/peerj.3720</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="dodt2012" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id6">[7]</a></td><td>Matthias Dodt, Johannes&nbsp;T Roehr, Rina Ahmed, and Christoph Dieterich. Flexbar-flexible barcode and adapter processing for next-generation sequencing platforms. <em>Biology</em>, 1:895–905, December 2012. <a class="reference external" href="https://doi.org/10.3390/biology1030895">doi:10.3390/biology1030895</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="kong2011" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[8]</a></td><td>Yong Kong. Btrim: a fast, lightweight adapter and quality trimming program for next-generation sequencing technologies. <em>Genomics</em>, 98(2):152–153, 2011.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="lassmann2015" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id9">[9]</a></td><td>Timo Lassmann. Tagdust2: a generic method to extract reads from sequencing data. <em>BMC bioinformatics</em>, 16:24, January 2015. <a class="reference external" href="https://doi.org/10.1186/s12859-015-0454-y">doi:10.1186/s12859-015-0454-y</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="ej200" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id5">[10]</a></td><td>Marcel Martin. Cutadapt removes adapter sequences from high-throughput sequencing reads. <em>EMBnet.journal</em>, 17(1):10–12, 2011. URL: <a class="reference external" href="http://journal.embnet.org/index.php/embnetjournal/article/view/200">http://journal.embnet.org/index.php/embnetjournal/article/view/200</a>, <a class="reference external" href="https://doi.org/10.14806/ej.17.1.200">doi:10.14806/ej.17.1.200</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="perez-rubio2019" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id13">[11]</a></td><td>Paula Pérez-Rubio, Claudio Lottaz, and Julia&nbsp;C Engelmann. Fastqpuri: high-performance preprocessing of rna-seq data. <em>BMC bioinformatics</em>, 20:226, May 2019. <a class="reference external" href="https://doi.org/10.1186/s12859-019-2799-0">doi:10.1186/s12859-019-2799-0</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="schmieder2011" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id7">[12]</a></td><td>Robert Schmieder and Robert Edwards. Quality control and preprocessing of metagenomic datasets. <em>Bioinformatics (Oxford, England)</em>, 27:863–864, March 2011. <a class="reference external" href="https://doi.org/10.1093/bioinformatics/btr026">doi:10.1093/bioinformatics/btr026</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="smeds2011" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id4">[13]</a></td><td>Linnéa Smeds and Axel Künstner. Condetri–a content dependent read trimmer for illumina data. <em>PloS one</em>, 6:e26314, 2011. <a class="reference external" href="https://doi.org/10.1371/journal.pone.0026314">doi:10.1371/journal.pone.0026314</a>.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="williams2016" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[14]</a></td><td>Claire&nbsp;R Williams, Alyssa Baccarella, Jay&nbsp;Z Parrish, and Charles&nbsp;C Kim. Trimming of sequence reads alters rna-seq gene expression estimates. <em>BMC bioinformatics</em>, 17:103, February 2016. <a class="reference external" href="https://doi.org/10.1186/s12859-016-0956-2">doi:10.1186/s12859-016-0956-2</a>.</td></tr>
+</tbody>
+</table>
+</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">VATK</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="evaluation.html">Evaluation of sequence data</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Trimming</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#tools">Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#benchmark">Benchmark</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="duplicate.html">Pre-assembly duplicate removal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="referenceselection.html">Reference selection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alignment.html">Alignment/mapping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="postalignmentanalysis.html">Post-alignment analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reportingstats.html">Reporting alignment stats</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="evaluation.html" title="previous chapter">Evaluation of sequence data</a></li>
+      <li>Next: <a href="duplicate.html" title="next chapter">Pre-assembly duplicate removal</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, CVR bioinformatics.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/trimming.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

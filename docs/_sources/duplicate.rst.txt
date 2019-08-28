@@ -1,0 +1,13 @@
+Pre-assembly duplicate removal
+==============================
+
+
+See :cite:`Gomez-Alvarez2009` for an introduction to stylish blah, blah...
+
+
+
+
+
+.. bibliography:: references.bib
+   :style: plain
+

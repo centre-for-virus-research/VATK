@@ -1,0 +1,18 @@
+Reporting alignment stats
+=========================
+
+
+
+Depth of coverage
+#################
+
+
+
+Breadth of coverage
+###################
+
+
+
+Standard error and covariance
+#############################
+
