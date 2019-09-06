@@ -143,10 +143,10 @@ Duplicate removal and contaminant sequence filtering will be covered elsewhere.<
 </tbody>
 </table>
 </div>
-<div class="section" id="benchmark">
-<h2>Benchmark<a class="headerlink" href="#benchmark" title="Permalink to this headline">¶</a></h2>
-<p>Benchmark by time, memory usage</p>
-<p>Btrim:</p>
+<div class="section" id="how-to-run">
+<h2>How to run<a class="headerlink" href="#how-to-run" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="btrim">
+<h3>Btrim:<a class="headerlink" href="#btrim" title="Permalink to this headline">¶</a></h3>
 <p>Trims low quality at both or either ends of a fastq sequence, identify barcodes,
 handle indels in adapters and barcodes. The adaptors are provided as a 6 column text-tab delimited
 file where the user can specify which region in the sequence to search for adaptors in.
@@ -166,68 +166,62 @@ paired_end_trim.pl output_R1.sum25 output_21.sum25 output_R1.25 output_R2.25
 </pre></div>
 </div>
 <p>Works directly on .gz files. Provides total sequence count and length distribution.</p>
-<p>/usr/bin/time -f “%Sn%U”
-btrim/btrim64 -q -s Rana-01_R1.s -o Rana-01_R1.btrim64 -t ~/Documents/VirusAssemblathon/Ranavirus/Rana-01_S1_L001_R1_001.fastq.gz
-btrim/btrim64 -q -s Rana-01_R2.s -o Rana-01_R2.btrim64 -t ~/Documents/VirusAssemblathon/Ranavirus/Rana-01_S1_L001_R2_001.fastq.gz &gt; Rana-01_R2.stdout
-btrim/paired_end_trim.pl Rana-01_R1.s Rana-01_R2.s Rana-01_R1.btrim64 Rana-01_R2.btrim64</p>
-<p>Time: 3.35user 1.01system 0:05.33elapsed 81%CPU</p>
-<p>Default:
-maximum number of errors in 5’-adaptor [default=3]
-maximum number of errors in 3’-adaptor [default=4]
-minimal insert size [default=25]
-size of moving window for quality trimming [default=5]
-cutoff for average quality scores within the moving window for quality trimming [default=15]</p>
-<p>Disadvantages: Dealing with paired-end reads is a two step process.</p>
-<p>ConDeTri:
-single and paired end of different sequence length independent from user
+<p><strong>Default:</strong></p>
+<ul class="simple">
+<li>maximum number of errors in 5’-adaptor [default=3]</li>
+<li>maximum number of errors in 3’-adaptor [default=4]</li>
+<li>minimal insert size [default=25]</li>
+<li>size of moving window for quality trimming [default=5]</li>
+<li>cutoff for average quality scores within the moving window for quality trimming [default=15]</li>
+</ul>
+<p><strong>Disadvantages:</strong> Dealing with paired-end reads is a two step process.</p>
+</div>
+<div class="section" id="condetri">
+<h3>ConDeTri:<a class="headerlink" href="#condetri" title="Permalink to this headline">¶</a></h3>
+<p>Single-end and paired-end trimming independent from user
 interaction, trim and remove reads with low quality scores.</p>
-<p>Default: Settings: HQ=25 LQ=10 Frac=0.8 Lfrac=0 MH=5 ML=1 Minlen=50 Scoring=33
-Hiqh quality threshold [25].
-Low quality threshold [10].
-Fraction of read that must exceed hq [0.8].
-Min allowed read length [50].
-When this no of sequential hq bases is reached, the trimming stops [5].
-Max no of lq bases allowed after a stretch of hq bases from 3’-end [1].</p>
-<p>./condetri/condetri.pl -sc=33 -fastq1= -fastq2= -prefix=</p>
-<p>Seemed very very slow</p>
-<p>Cutadapt:</p>
-<blockquote>
-<div><table class="docutils option-list" frame="void" rules="none">
-<col class="option" />
-<col class="description" />
-<tbody valign="top">
-<tr><td class="option-group" colspan="2">
-<kbd><span class="option">--quality-base <var>N</var></span></kbd></td>
-</tr>
-<tr><td>&#160;</td><td>Assume that quality values in FASTQ are encoded as
-ascii(quality + N). This needs to be set to 64 for
-some old Illumina FASTQ files. Default: 33</td></tr>
-</tbody>
-</table>
-<dl class="docutils">
-<dt>-m LEN[:LEN2], –minimum-length LEN[:LEN2]</dt>
-<dd><blockquote class="first">
-<div>Discard reads shorter than LEN. Default: 0</div></blockquote>
-<p class="last">cutadapt -a ADAPT1 -A ADAPT2 [options] -o out1.fastq -p out2.fastq in1.fastq in2.fastq</p>
-</dd>
-</dl>
-</div></blockquote>
-<p>FASTX:</p>
-<blockquote>
-<div><p>$ fastx_trimmer -h
-usage: fastx_trimmer [-h] [-f N] [-l N] [-z] [-v] [-i INFILE] [-o OUTFILE]</p>
-<dl class="docutils">
-<dt>version 0.0.6</dt>
-<dd>[-h]         = This helpful help screen.
-[-f N]       = First base to keep. Default is 1 (=first base).
-[-l N]       = Last base to keep. Default is entire read.
-[-z]         = Compress output with GZIP.
-[-i INFILE]  = FASTA/Q input file. default is STDIN.
-[-o OUTFILE] = FASTA/Q output file. default is STDOUT.</dd>
-</dl>
-</div></blockquote>
-<p>Flexbar:
-Can do color-space reads (454), maintains read pairing and separates barcode reads.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>condetri.pl -sc<span class="o">=</span><span class="m">33</span> -fastq1<span class="o">=</span>input_R1.fq -fastq2<span class="o">=</span>input_R2.fq -prefix<span class="o">=</span>output
+</pre></div>
+</div>
+<p><strong>Default:</strong></p>
+<ul class="simple">
+<li>HQ = Hiqh quality threshold [25].</li>
+<li>LQ = Low quality threshold [10].</li>
+<li>Frac = Fraction of read that must exceed hq [0.8].</li>
+<li>Minlen = Min allowed read length [50].</li>
+<li>MH = When this number of sequential HQ bases is reached, the trimming stops [5].</li>
+<li>ML = Max number of LQ bases allowed after a stretch of HQ bases from 3’-end [1].</li>
+</ul>
+<p><strong>Disadvantages:</strong> Seems very very slow.</p>
+</div>
+<div class="section" id="cutadapt">
+<h3>Cutadapt:<a class="headerlink" href="#cutadapt" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>--quality-base N      Assume that quality values in FASTQ are encoded as
+                       ascii<span class="o">(</span>quality + N<span class="o">)</span>. This needs to be <span class="nb">set</span> to <span class="m">64</span> <span class="k">for</span>
+                       some old Illumina FASTQ files. Default: <span class="m">33</span>
+-m LEN<span class="o">[</span>:LEN2<span class="o">]</span>, --minimum-length LEN<span class="o">[</span>:LEN2<span class="o">]</span>
+                       Discard reads shorter than LEN. Default: <span class="m">0</span>
+  cutadapt -a ADAPT1 -A ADAPT2 <span class="o">[</span>options<span class="o">]</span> -o out1.fastq -p out2.fastq in1.fastq in2.fastq
+</pre></div>
+</div>
+</div>
+<div class="section" id="fastx">
+<h3>FASTX:<a class="headerlink" href="#fastx" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ fastx_trimmer -h
+usage: fastx_trimmer <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>-f N<span class="o">]</span> <span class="o">[</span>-l N<span class="o">]</span> <span class="o">[</span>-z<span class="o">]</span> <span class="o">[</span>-v<span class="o">]</span> <span class="o">[</span>-i INFILE<span class="o">]</span> <span class="o">[</span>-o OUTFILE<span class="o">]</span>
+version <span class="m">0</span>.0.6
+  <span class="o">[</span>-h<span class="o">]</span>         <span class="o">=</span> This helpful <span class="nb">help</span> screen.
+  <span class="o">[</span>-f N<span class="o">]</span>       <span class="o">=</span> First base to keep. Default is <span class="m">1</span> <span class="o">(=</span>first base<span class="o">)</span>.
+  <span class="o">[</span>-l N<span class="o">]</span>       <span class="o">=</span> Last base to keep. Default is entire read.
+  <span class="o">[</span>-z<span class="o">]</span>         <span class="o">=</span> Compress output with GZIP.
+  <span class="o">[</span>-i INFILE<span class="o">]</span>  <span class="o">=</span> FASTA/Q input file. default is STDIN.
+  <span class="o">[</span>-o OUTFILE<span class="o">]</span> <span class="o">=</span> FASTA/Q output file. default is STDOUT.
+</pre></div>
+</div>
+</div>
+<div class="section" id="flexbar">
+<h3>Flexbar:<a class="headerlink" href="#flexbar" title="Permalink to this headline">¶</a></h3>
+<p>Can do color-space reads (454), maintains read pairing and separates barcode reads.</p>
 <p>The program Flexbar preprocesses high-throughput sequencing data efficiently. It
 demultiplexes barcoded runs and removes adapter sequences. Several adapter removal presets
 for Illumina libraries are included. Flexbar computes exact overlap alignments using SIMD
@@ -236,13 +230,43 @@ trimming of homopolymers at read ends. Flexbar increases read mapping rates and 
 genome as well as transcriptome assemblies. Unique molecular identifiers can be extracted
 in a flexible way. The software supports data in fasta and fastq format from multiple
 sequencing platforms</p>
-<p>PRINSEQ
-PRINSEQ-lite 0.20.4
-Lots of different graph outputs.</p>
-<p>perl prinseq-lite.pl -verbose -fastq test_1.fq -fastq2 test_2.fq -ns_max_n 0 -out_good test_no_ns -out_bad test_with_ns
-Singletons will automatically be filtered and stored in separate files (here test_no_ns_1_singletons.fastq and test_no_ns_2_singletons.fastq) in addition to the files test_no_ns_1.fastq, test_no_ns_2.fastq, test_with_ns_1.fastq, and test_with_ns_2.fastq.</p>
-<p>No direct way of dealing with paired end that are zipped.</p>
-<p>SolexaQA</p>
+</div>
+<div class="section" id="prinseq">
+<h3>PRINSEQ:<a class="headerlink" href="#prinseq" title="Permalink to this headline">¶</a></h3>
+<p>Lots of different graphical outputs.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>perl prinseq-lite.pl -verbose -fastq test_1.fq -fastq2 test_2.fq -ns_max_n <span class="m">0</span> -out_good test_no_ns -out_bad test_with_ns
+</pre></div>
+</div>
+<p>Singletons will automatically be filtered and stored in separate files (here test_no_ns_1_singletons.fastq and test_no_ns_2_singletons.fastq)
+in addition to the files test_no_ns_1.fastq, test_no_ns_2.fastq, test_with_ns_1.fastq, and test_with_ns_2.fastq.</p>
+<p><strong>Disadvantages:</strong> No direct way of dealing with paired end that are zipped.</p>
+</div>
+</div>
+<div class="section" id="benchmark">
+<h2>Benchmark<a class="headerlink" href="#benchmark" title="Permalink to this headline">¶</a></h2>
+<p>Benchmark by time, memory usage</p>
+<p>Commands used for benchmarking:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>btrim64 -a <span class="m">25</span> -l <span class="m">50</span> -q -s tmp.r1.s -o output_R1 -t input_R1.fastq.gz
+btrim64 -a <span class="m">25</span> -l <span class="m">50</span> -q -s tmp.r2.s -o output_R2 -t input_R2.fastq.gz
+paired_end_trim.pl tmp.r1.s tmp.r2.s output_R1 output_R2
+cat output_R1.se output_R2.se &gt; output_unpaired.fastq
+mv output_R1.pe output_R1.fastq
+mv output_R2.pe output_R2.fastq
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>condetri.pl -sc<span class="o">=</span><span class="m">33</span> -fastq1<span class="o">=</span>input_R1.fastq.gz -fastq2<span class="o">=</span>input_R2.fastq.gz -prefix<span class="o">=</span>output
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cutadapt -m <span class="m">50</span> -q <span class="m">25</span> -o output_R1.fastq.gz -p output_R2.fastq.gz --too-short-output<span class="o">=</span>tooshort.1.fastq.gz --too-short-paired-output<span class="o">=</span>tooshort.2.fastq.gz input_R1.fastq.gz input_R2.fastq.gz
+cutadapt -m <span class="m">50</span> -q <span class="m">25</span> -o rescued.a.fastq.gz tooshort.1.fastq.gz
+cutadapt -m <span class="m">50</span> -q <span class="m">25</span> -o rescued.b.fastq.gz tooshort.2.fastq.gz
+cat  rescued.a.fastq.gz rescued.b.fastq.gz &gt; rescued.fastq.gz
+gunzip -c rescued.fastq.gz &gt; <span class="o">{</span>output.cutadaptsingle<span class="o">}</span>
+gunzip -c output_R1.fastq.gz &gt; <span class="o">{</span>output.cutadapt1<span class="o">}</span>
+gunzip -c output_R2.fastq.gz &gt; <span class="o">{</span>output.cutadapt2<span class="o">}</span>
+</pre></div>
+</div>
+<img alt="_images/time_plot.png" src="_images/time_plot.png" />
 <p id="bibtex-bibliography-trimming-0"><table class="docutils citation" frame="void" id="aronesty2013" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
@@ -353,6 +377,7 @@ Singletons will automatically be filtered and stored in separate files (here tes
 <li class="toctree-l1"><a class="reference internal" href="evaluation.html">Evaluation of sequence data</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Trimming</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#tools">Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-to-run">How to run</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#benchmark">Benchmark</a></li>
 </ul>
 </li>
@@ -361,6 +386,7 @@ Singletons will automatically be filtered and stored in separate files (here tes
 <li class="toctree-l1"><a class="reference internal" href="alignment.html">Alignment/mapping</a></li>
 <li class="toctree-l1"><a class="reference internal" href="postalignmentanalysis.html">Post-alignment analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reportingstats.html">Reporting alignment stats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipelines.html">Pipelines</a></li>
 </ul>
 
 <div class="relations">

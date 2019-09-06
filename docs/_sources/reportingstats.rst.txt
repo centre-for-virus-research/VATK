@@ -1,7 +1,9 @@
 Reporting alignment stats
 =========================
 
-
+An important step for checking the quality of a particular reference assembly is to 
+generate depth and breadth of coverage of the reads. A number of tools have been developed 
+for this.
 
 Depth of coverage
 #################
@@ -16,3 +18,14 @@ Breadth of coverage
 Standard error and covariance
 #############################
 
+
+
+
+
+weeSAM
+######
+
+
+`weeSAM <https://github.com/centre-for-virus-research/weeSAM>`_ takes either a SAM or BAM file 
+as an input and can generate the output in text-tab delimited format or as an html file with 
+figures of coverage plots. If a SAM file is provided as input, the BAM file will be automatically produced.

@@ -83,34 +83,177 @@ Tools
    * - ea-utils 
      - https://expressionanalysis.github.io/ea-utils/
      - :cite:`Aronesty2013` 
+   * - TrimGalore
+     - https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/
+     - N/A
      
      
 
+How to run
+##########
+
+Btrim:
+------
+
+Trims low quality at both or either ends of a fastq sequence, identify barcodes, 
+handle indels in adapters and barcodes. The adaptors are provided as a 6 column text-tab delimited 
+file where the user can specify which region in the sequence to search for adaptors in.
+To trim Illumina adaptor AGATCGGAAGAGC with a window size of 10 and a cutoff for average 
+quality scores within the moving window for quality trimming of 25, where only 3'-end trimming is 
+carried out, keeping a minimal length sequence of 40:
+
+.. code-block:: bash
+
+   btrim64 -w 10 -a 25 -p illumina_adapter.txt -3 -P -o output.fastq -l 40 -t <(gunzip -c path_to_your_fastq/*.gz ) -C -z
+
+
+The disadvantage is that it does not deal directly with paired-end reads, so the individual 
+files need to be trimmed first and then the perl script paired_end_trim.pl is used 
+to create the files where both ends passed the trimming. Another two files (*.se) are 
+generated for the reads where only one end passed the trimming.
+
+.. code-block:: bash
+
+   btrim64 -a 25 -q -t input_R1.fq -o output_R1.25 -s output_R1.sum25
+   btrim64 -a 25 -q -t input_R1.fq -o output_R2.25 -s output_R2.sum25
+   paired_end_trim.pl output_R1.sum25 output_21.sum25 output_R1.25 output_R2.25
+
+
+Works directly on .gz files. Provides total sequence count and length distribution.
+
+**Default:**
+
+* maximum number of errors in 5'-adaptor [default=3]
+
+* maximum number of errors in 3'-adaptor [default=4]
+
+* minimal insert size [default=25]
+
+* size of moving window for quality trimming [default=5]
+
+* cutoff for average quality scores within the moving window for quality trimming [default=15]
+
+**Disadvantages:** Dealing with paired-end reads is a two step process.
+
+ConDeTri:
+---------
+
+Single-end and paired-end trimming independent from user 
+interaction, trim and remove reads with low quality scores.
+
+.. code-block:: bash
+
+   condetri.pl -sc=33 -fastq1=input_R1.fq -fastq2=input_R2.fq -prefix=output
+
+**Default:**
+
+* HQ = Hiqh quality threshold [25].
+
+* LQ = Low quality threshold [10].
+
+* Frac = Fraction of read that must exceed hq [0.8].
+
+* Minlen = Min allowed read length [50].
+
+* MH = When this number of sequential HQ bases is reached, the trimming stops [5].
+
+* ML = Max number of LQ bases allowed after a stretch of HQ bases from 3'-end [1].
+
+**Disadvantages:** Seems very very slow.
+
+
+Cutadapt:
+---------
+
+.. code-block:: bash
+
+ --quality-base N      Assume that quality values in FASTQ are encoded as
+                        ascii(quality + N). This needs to be set to 64 for
+                        some old Illumina FASTQ files. Default: 33
+ -m LEN[:LEN2], --minimum-length LEN[:LEN2]
+                        Discard reads shorter than LEN. Default: 0
+   cutadapt -a ADAPT1 -A ADAPT2 [options] -o out1.fastq -p out2.fastq in1.fastq in2.fastq
+
+
+FASTX:
+------
+
+.. code-block:: bash
+
+ $ fastx_trimmer -h
+ usage: fastx_trimmer [-h] [-f N] [-l N] [-z] [-v] [-i INFILE] [-o OUTFILE]
+ version 0.0.6
+   [-h]         = This helpful help screen.
+   [-f N]       = First base to keep. Default is 1 (=first base).
+   [-l N]       = Last base to keep. Default is entire read.
+   [-z]         = Compress output with GZIP.
+   [-i INFILE]  = FASTA/Q input file. default is STDIN.
+   [-o OUTFILE] = FASTA/Q output file. default is STDOUT.
+
+
+
+Flexbar:
+--------
+
+Can do color-space reads (454), maintains read pairing and separates barcode reads.
+
+The program Flexbar preprocesses high-throughput sequencing data efficiently. It 
+demultiplexes barcoded runs and removes adapter sequences. Several adapter removal presets 
+for Illumina libraries are included. Flexbar computes exact overlap alignments using SIMD 
+and multicore parallelism. Moreover, trimming and filtering features are provided, e.g. 
+trimming of homopolymers at read ends. Flexbar increases read mapping rates and improves 
+genome as well as transcriptome assemblies. Unique molecular identifiers can be extracted 
+in a flexible way. The software supports data in fasta and fastq format from multiple 
+sequencing platforms
+
+PRINSEQ:
+--------
+
+Lots of different graphical outputs.
+
+.. code-block:: bash
+
+   perl prinseq-lite.pl -verbose -fastq test_1.fq -fastq2 test_2.fq -ns_max_n 0 -out_good test_no_ns -out_bad test_with_ns
+
+
+Singletons will automatically be filtered and stored in separate files (here test_no_ns_1_singletons.fastq and test_no_ns_2_singletons.fastq) 
+in addition to the files test_no_ns_1.fastq, test_no_ns_2.fastq, test_with_ns_1.fastq, and test_with_ns_2.fastq. 
+
+**Disadvantages:** No direct way of dealing with paired end that are zipped.
 
 Benchmark
 #########
 
 Benchmark by time, memory usage
 
-Btrim:
-trim low quality at both or either ends, identify barcodes, handle indels in adapters and barcodes
+Commands used for benchmarking:
 
-ConDeTri:
-single and paired end of different sequence length independent from user 
-interaction, trim and remove reads with low quality scores.
+.. code-block:: bash
 
-Cutadapt:
+   btrim64 -a 25 -l 50 -q -s tmp.r1.s -o output_R1 -t input_R1.fastq.gz
+   btrim64 -a 25 -l 50 -q -s tmp.r2.s -o output_R2 -t input_R2.fastq.gz
+   paired_end_trim.pl tmp.r1.s tmp.r2.s output_R1 output_R2 
+   cat output_R1.se output_R2.se > output_unpaired.fastq
+   mv output_R1.pe output_R1.fastq
+   mv output_R2.pe output_R2.fastq
 
-FASTX:
+.. code-block:: bash
 
-Flexbar:
-Can do color-space reads (454), maintains read pairing and separates barcode reads.
+   condetri.pl -sc=33 -fastq1=input_R1.fastq.gz -fastq2=input_R2.fastq.gz -prefix=output
+   
 
-PRINSEQ
+.. code-block:: bash
+
+   cutadapt -m 50 -q 25 -o output_R1.fastq.gz -p output_R2.fastq.gz --too-short-output=tooshort.1.fastq.gz --too-short-paired-output=tooshort.2.fastq.gz input_R1.fastq.gz input_R2.fastq.gz
+   cutadapt -m 50 -q 25 -o rescued.a.fastq.gz tooshort.1.fastq.gz 
+   cutadapt -m 50 -q 25 -o rescued.b.fastq.gz tooshort.2.fastq.gz 
+   cat  rescued.a.fastq.gz rescued.b.fastq.gz > rescued.fastq.gz
+   gunzip -c rescued.fastq.gz > {output.cutadaptsingle}
+   gunzip -c output_R1.fastq.gz > {output.cutadapt1}
+   gunzip -c output_R2.fastq.gz > {output.cutadapt2}
 
 
-SolexaQA
-
+.. image:: time_plot.png
 
 
 .. bibliography:: trimrefs.bib

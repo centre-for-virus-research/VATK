@@ -1,6 +1,8 @@
 Welcome to VATK's documentation!
 ================================
 
+.. image:: VATK_overview.png
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
@@ -12,7 +14,10 @@ Welcome to VATK's documentation!
    alignment
    postalignmentanalysis
    reportingstats
-   
+   pipelines
+
+
+ 
 
 Indices and tables
 ==================
