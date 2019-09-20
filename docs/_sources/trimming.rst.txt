@@ -209,7 +209,7 @@ sequencing platforms
 PRINSEQ:
 --------
 
-Lots of different graphical outputs.
+One of the big advantages of prinseq are the large number of different graphical outputs. See `Prinseq help <help/prinseq.txt>`_
 
 .. code-block:: bash
 
@@ -219,12 +219,28 @@ Lots of different graphical outputs.
 Singletons will automatically be filtered and stored in separate files (here test_no_ns_1_singletons.fastq and test_no_ns_2_singletons.fastq) 
 in addition to the files test_no_ns_1.fastq, test_no_ns_2.fastq, test_with_ns_1.fastq, and test_with_ns_2.fastq. 
 
-**Disadvantages:** No direct way of dealing with paired end that are zipped.
+**Disadvantages:** No direct way of dealing with paired end that are zipped, you will need to unzip on the fly:
+
+.. code-block:: bash
+
+  /prinseq <your parameters> <(gzip -d -c input.fq.gz)
+  
+  
+Or if you have paired-end, you need to unzip-trim (zip if you want to keep your reads compressed) and then match the pairs up again (https://github.com/sestaton/Pairfq)
+
+.. code-block:: bash
+
+ gzip -dc input_R1.fastq.gz | prinseq-lite.pl -fastq stdin -out_bad null -out_good stdout \
+   -trim_qual_right 20 -min_qual_mean 20 -min_len 35 -log prinseq.input_R1.log | gzip > input_R1.trim.gz
+ gzip -dc input_2.fastq.gz | prinseq-lite.pl -fastq stdin -out_bad null -out_good stdout \
+   -trim_qual_right 20 -min_qual_mean 20 -min_len 35 -log prinseq.input_R2.log | gzip > input_R2.trim.gz
+ pairfq makepairs -f input_R1.trim.gz -r input_R2.trim.gz -fp output_R1.trim.fastq-common.out.gz \
+   -rp output_R2.trim.fastq-common.out.gz -fs output_R1.trim.fastq-unique.out.gz -rs output_R2.trim.fastq-unique.out.gz --compress gzip
+
 
 Benchmark
 #########
 
-Benchmark by time, memory usage
 
 Commands used for benchmarking:
 
@@ -248,12 +264,55 @@ Commands used for benchmarking:
    cutadapt -m 50 -q 25 -o rescued.a.fastq.gz tooshort.1.fastq.gz 
    cutadapt -m 50 -q 25 -o rescued.b.fastq.gz tooshort.2.fastq.gz 
    cat  rescued.a.fastq.gz rescued.b.fastq.gz > rescued.fastq.gz
-   gunzip -c rescued.fastq.gz > {output.cutadaptsingle}
-   gunzip -c output_R1.fastq.gz > {output.cutadapt1}
-   gunzip -c output_R2.fastq.gz > {output.cutadapt2}
+   gunzip -c rescued.fastq.gz > output_unpaired.fastq
+   gunzip -c output_R1.fastq.gz > output_R1.fastq
+   gunzip -c output_R2.fastq.gz > output_R2.fastq
 
+
+.. code-block:: bash
+
+   flexbar -r input_R1.fastq.gz -p input_R2.fastq.gz -qt 25 -m 50 -qf i1.8 --adapter-preset TruSeq -ap ON -s
+   mv flexbarOut_1.fastq output_R1.fastq
+   mv flexbarOut_2.fastq output_R2.fastq
+   cat flexbarOut_1_single.fastq flexbarOut_2_single.fastq > output_unpaired.fastq
+
+
+.. code-block:: bash
+
+   gunzip -c input_R1.fastq.gz > tmp_R1.fq
+   gunzip -c input_R2.fastq.gz > tmp_R2.fq
+   prinseq-lite.pl -verbose -min_qual_mean 25 -min_len 50 -fastq tmp_R1.fq -fastq2 tmp_R2.fq -ns_max_n 0 -out_good tmp_no_ns -out_bad null 
+   cat tmp_no_ns_1_singletons.fastq tmp_no_ns_2_singletons.fastq > output_unpaired.fastq
+   mv tmp_no_ns_1.fastq output_R1.fastq
+   mv tmp_no_ns_2.fastq output_R2.fastq
+
+.. code-block:: bash
+
+   TrimmomaticPE -phred33 input_R1.fastq.gz input_R2.fastq.gz output_R1.fastq tmp1_unpaired.fq output_R1.fastq tmp2_unpaired.fq ILLUMINACLIP:TruSeq2-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:5:25 MINLEN:50
+   cat tmp1_unpaired.fq tmp2_unpaired.fq > output_unpaired.fastq
+
+
+.. code-block:: bash
+
+   trim_galore --quality 25 --length 50 --retain_unpaired --stringency 1 --dont_gzip --paired input_R1.fastq.gz input_R2.fastq.gz
+   cat input_R1_unpaired_1.fq input_R2_unpaired_2.fq > output_unpaired.fastq
+   mv input_R1_001_val_1.fq output_R1.fastq
+   mv input_R2_001_val_2.fq output_R2.fastq
+
+
+Benchmarking by time
+--------------------
 
 .. image:: time_plot.png
+
+btrim < cutadapt < trimgalore < trimmomatic
+
+
+Benchmarking by reads removed
+-----------------------------
+
+
+
 
 
 .. bibliography:: trimrefs.bib
