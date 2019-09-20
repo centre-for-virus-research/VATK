@@ -1,0 +1,482 @@
+prinseq-lite.pl -help
+Usage:
+    perl prinseq-lite.pl [-h] [-help] [-version] [-man] [-verbose] [-fastq
+    input_fastq_file] [-fasta input_fasta_file] [-fastq2 input_fastq_file_2]
+    [-fasta2 input_fasta_file_2] [-qual input_quality_file] [-min_len
+    int_value] [-max_len int_value] [-range_len ranges] [-min_gc int_value]
+    [-max_gc int_value] [-range_gc ranges] [-min_qual_score int_value]
+    [-max_qual_score int_value] [-min_qual_mean int_value] [-max_qual_mean
+    int_value] [-ns_max_p int_value] [-ns_max_n int_value] [-noniupac]
+    [-seq_num int_value] [-derep int_value] [-derep_min int_value]
+    [-lc_method method_name] [-lc_threshold int_value] [-trim_to_len
+    int_value] [-trim_left int_value] [-trim_right int_value] [-trim_left_p
+    int_value] [-trim_right_p int_value] [-trim_ns_left int_value]
+    [-trim_ns_right int_value] [-trim_tail_left int_value] [-trim_tail_right
+    int_value] [-trim_qual_left int_value] [-trim_qual_right int_value]
+    [-trim_qual_type type] [-trim_qual_rule rule] [-trim_qual_window
+    int_value] [-trim_qual_step int_value] [-seq_case case] [-dna_rna type]
+    [-line_width int_value] [-rm_header] [-seq_id id_string] [-out_format
+    int_value] [-out_good filename_prefix] [-out_bad filename_prefix]
+    [-phred64] [-stats_info] [-stats_len] [-stats_dinuc] [-stats_tag]
+    [-stats_dupl] [-stats_ns] [-stats_assembly] [-stats_all] [-aa]
+    [-graph_data file] [-graph_stats string] [-qual_noscale]
+    [-no_qual_header] [-exact_only] [-log file] [-custom_params string]
+    [-params file] [-seq_id_mappings file]
+
+Options:
+    -help | -h
+            Print the help message; ignore other arguments.
+
+    -man    Print the full documentation; ignore other arguments.
+
+    -version
+            Print program version; ignore other arguments.
+
+    -verbose
+            Prints status and info messages during processing.
+
+    ***** INPUT OPTIONS *****
+    -fastq <file>
+            Input file in FASTQ format that contains the sequence and
+            quality data. Use stdin instead of a file name to read from
+            STDIN (-fasta stdin). This can be useful to process compressed
+            files using Unix pipes.
+
+    -fasta <file>
+            Input file in FASTA format that contains the sequence data. Use
+            stdin instead of a file name to read from STDIN (-fastq stdin).
+            This can be useful to process compressed files using Unix pipes.
+
+    -qual <file>
+            Input file in QUAL format that contains the quality data.
+
+    -fastq2 <file>
+            For paired-end data only. Input file in FASTQ format that
+            contains the sequence and quality data. The sequence identifiers
+            for two matching paired-end sequences in separate files can be
+            marked by /1 and /2, or _L and _R, or _left and _right, or must
+            have the exact same identifier in both input files. The input
+            sequences must be sorted by their sequence identifiers.
+            Singletons are allowed in the input files.
+
+    -fasta2 <file>
+            For paired-end data only. Input file in FASTA format that
+            contains the sequence data. The sequence identifiers for two
+            matching paired-end sequences in separate files can be marked by
+            /1 and /2, or _L and _R, or _left and _right, or must have the
+            exact same identifier in both input files. The input sequences
+            must be sorted by their sequence identifiers. Singletons are
+            allowed in the input files.
+
+    -params <file>
+            Input file in text format that contains PRINSEQ parameters. Each
+            parameter should be specified on a new line and arguments should
+            be separated by spaces or tabs. Comments can be specified on
+            lines starting with the # sign. Can be combined with command
+            line parameters. Parameters specified on the command line will
+            overwrite the arguments in the file (if any).
+
+    -si13   This option was replaced by option -phred64.
+
+    -phred64
+            Quality data in FASTQ file is in Phred+64 format
+            (http://en.wikipedia.org/wiki/FASTQ_format#Encoding). Not
+            required for Illumina 1.8+, Sanger, Roche/454, Ion Torrent,
+            PacBio data.
+
+    -aa     Input is amino acid (protein) sequences instead of nucleic acid
+            (DNA or RNA) sequences. Allowed amino acid characters:
+            ABCDEFGHIKLMNOPQRSTUVWYZXabcdefghiklmmopqrstuvwyzx*- and allowed
+            nucleic acid characters: ACGTURYKMSWBDHVNXacgturykmswbdhvnx-
+
+            The following options are ignored for -aa:
+            stats_dinuc,stats_tag,stats_ns,dna_rna
+
+    ***** OUTPUT OPTIONS *****
+    -out_format <integer>
+            To change the output format, use one of the following options.
+            If not defined, the output format will be the same as the input
+            format.
+
+            1 (FASTA only), 2 (FASTA and QUAL), 3 (FASTQ), 4 (FASTQ and
+            FASTA), or 5 (FASTQ, FASTA and QUAL)
+
+    -out_good <string>
+            By default, the output files are created in the same directory
+            as the input file containing the sequence data with an
+            additional "_prinseq_good_XXXX" in their name (where XXXX is
+            replaced by random characters to prevent overwriting previous
+            files). To change the output filename and location, specify the
+            filename using this option. The file extension will be added
+            automatically (either .fasta, .qual, or .fastq). For paired-end
+            data, filenames contain additionally "_1", "_1_singletons",
+            "_2", and "_2_singletons" before the file extension. Use
+            "-out_good null" to prevent the program from generating the
+            output file(s) for data passing all filters. Use "-out_good
+            stdout" to write data passing all filters to STDOUT (only for
+            FASTA or FASTQ output files).
+
+            Example: use "file_passed" to generate the output file
+            file_passed.fasta in the current directory
+
+    -out_bad <string>
+            By default, the output files are created in the same directory
+            as the input file containing the sequence data with an
+            additional "_prinseq_bad_XXXX" in their name (where XXXX is
+            replaced by random characters to prevent overwriting previous
+            files). To change the output filename and location, specify the
+            filename using this option. The file extension will be added
+            automatically (either .fasta, .qual, or .fastq). For paired-end
+            data, filenames contain additionally "_1" and "_2" before the
+            file extension. Use "-out_bad null" to prevent the program from
+            generating the output file(s) for data not passing any filter.
+            Use "-out_bad stdout" to write data not passing any filter to
+            STDOUT (only for FASTA or FASTQ output files).
+
+            Example: use "file_filtered" to generate the output file
+            file_filtered.fasta in the current directory
+
+            Example: "-out_good stdout -out_bad null" will write data
+            passing filters to STDOUT and data not passing any filter will
+            be ignored
+
+    -log <file>
+            Log file to keep track of parameters, errors, etc. The log file
+            name is optional. If no file name is given, the log file name
+            will be "inputname.log". If the log file already exists, new
+            content will be added to the file.
+
+    -graph_data <file>
+            File that contains the necessary information to generate the
+            graphs similar to the ones in the web version. The file name is
+            optional. If no file name is given, the file name will be
+            "inputname.gd". If the file already exists, new content will
+            overwrite the file. Use "-out_good null -out_bad null" to
+            prevent generating any additional outputs. (See below for more
+            options related to the graph data.)
+
+            The graph data can be used as input for the prinseq-graphs.pl
+            file to generate the PNG graph files or an HTML report file. If
+            you have trouble installing the required prinseq-graphs.pl
+            modules or want to see an output example report, upload the
+            graph data file at: http://edwards.sdsu.edu/prinseq/ -> Choose
+            "Get Report"
+
+    -graph_stats <string>
+            Use this option to select what statistics should be calculated
+            and included in the graph_data file. This is useful if you e.g.
+            do not need sequence complexity information, which requires a
+            lot of computation. Requires to have graph_data specified.
+            Default is all selected.
+
+            Allowed option are (separate multiple by comma with no spaces):
+            ld (Length distribution), gc (GC content distribution), qd (Base
+            quality distribution), ns (Occurence of N), pt (Poly-A/T tails),
+            ts (Tag sequence check), aq (Assembly quality measure), de
+            (Sequence duplication - exact only), da (Sequence duplication -
+            exact + 5'/3'), sc (Sequence complexity), dn (Dinucleotide odds
+            ratios, includes the PCA plots)
+
+            Example use: -graph_stats ld,gc,qd,de
+
+    -qual_noscale
+            Use this option if all your sequences are shorter than 100bp as
+            they do not require to scale quality data to 100 data points in
+            the graph. By default, quality scores of sequences shorter than
+            100bp or longer than 100bp are fit to 100 data points. (To
+            retrieve this information and calculate the graph data would
+            otherwise require to parse the data two times or store all the
+            quality data in memory.)
+
+    -no_qual_header
+            In order to reduce the file size, this option will generate an
+            empty header line for the quality data in FASTQ files. Instead
+            of +header, only the + sign will be output. The header of the
+            sequence data will be left unchanged. This option applies to
+            FASTQ output files only.
+
+    -exact_only
+            Use this option to check for exact (forward and reverse)
+            duplicates only when generating the graph data. This allows to
+            keep the memory requirements low for large input files and is
+            faster. This option will automatically be applied when using
+            -derep options 1 and/or 4 only. Specify option -derep 1 or
+            -derep 4 if you do not want to apply both at the same time.
+
+    -seq_id_mappings <file>
+            Text file containing the old and new (specified with -seq_id)
+            identifiers for later reference. This option is useful if e.g. a
+            renamed sequence has to be identified based on the new sequence
+            identifier. The file name is optional. If no file name is given,
+            the file name will be "inputname_prinseq_good.ids" (only good
+            sequences are renamed). If a file with the same name already
+            exists, new content will overwrite the old file. The text file
+            contains one sequence identifier pair per line, separated by
+            tabs (old-tab-new). Requires option -seq_id.
+
+    ***** FILTER OPTIONS *****
+    -min_len <integer>
+            Filter sequence shorter than min_len.
+
+    -max_len <integer>
+            Filter sequence longer than max_len.
+
+    -range_len <string>
+            Filter sequence by length range. Multiple range values should be
+            separated by comma without spaces.
+
+            Example: -range_len 50-100,250-300
+
+    -min_gc <integer>
+            Filter sequence with GC content below min_gc.
+
+    -max_gc <integer>
+            Filter sequence with GC content above max_gc.
+
+    -range_gc <string>
+            Filter sequence by GC content range. Multiple range values
+            should be separated by comma without spaces.
+
+            Example: -range_gc 50-60,75-90
+
+    -min_qual_score <integer>
+            Filter sequence with at least one quality score below
+            min_qual_score.
+
+    -max_qual_score <integer>
+            Filter sequence with at least one quality score above
+            max_qual_score.
+
+    -min_qual_mean <integer>
+            Filter sequence with quality score mean below min_qual_mean.
+
+    -max_qual_mean <integer>
+            Filter sequence with quality score mean above max_qual_mean.
+
+    -ns_max_p <integer>
+            Filter sequence with more than ns_max_p percentage of Ns.
+
+    -ns_max_n <integer>
+            Filter sequence with more than ns_max_n Ns.
+
+    -noniupac
+            Filter sequence with characters other than A, C, G, T or N.
+
+    -seq_num <integer>
+            Only keep the first seq_num number of sequences (that pass all
+            other filters).
+
+    -derep <integer>
+            Type of duplicates to filter. Allowed values are 1, 2, 3, 4 and
+            5. Use integers for multiple selections (e.g. 124 to use type 1,
+            2 and 4). The order does not matter. Option 2 and 3 will set 1
+            and option 5 will set 4 as these are subsets of the other
+            option.
+
+            1 (exact duplicate), 2 (5' duplicate), 3 (3' duplicate), 4
+            (reverse complement exact duplicate), 5 (reverse complement
+            5'/3' duplicate)
+
+    -derep_min <integer>
+            This option specifies the number of allowed duplicates. If you
+            want to remove sequence duplicates that occur more than x times,
+            then you would specify x+1 as the -derep_min values. For
+            examples, to remove sequences that occur more than 5 times, you
+            would specify -derep_min 6. This option can only be used in
+            combination with -derep 1 and/or 4 (forward and/or reverse exact
+            duplicates). [default : 2]
+
+    -lc_method <string>
+            Method to filter low complexity sequences. The current options
+            are "dust" and "entropy". Use "-lc_method dust" to calculate the
+            complexity using the dust method.
+
+    -lc_threshold <integer>
+            The threshold value (between 0 and 100) used to filter sequences
+            by sequence complexity. The dust method uses this as maximum
+            allowed score and the entropy method as minimum allowed value.
+
+    -custom_params <string>
+            Can be used to specify additional filters. The current set of
+            possible rules is limited and has to follow the specifications
+            below. The custom parameters have to be specified within quotes
+            (either ' or ").
+
+            Please separate parameter values with a space and separate new
+            parameter sets with semicolon (;). Parameters are defined by two
+            values: (1) the pattern (any combination of the letters
+            "ACGTN"), (2) the number of repeats or percentage of occurence
+            Percentage values are defined by a number followed by the %-sign
+            (without space). If no %-sign is given, it is assumed that the
+            given number specifies the number of repeats of the pattern.
+
+            Examples: "AAT 10" (filters out sequences containing
+            AATAATAATAATAATAATAATAATAATAAT anywhere in the sequence), "T
+            70%" (filters out sequences with more than 70% Ts in the
+            sequence), "A 15" (filters out sequences containing
+            AAAAAAAAAAAAAAA anywhere in the sequence), "AAT 10;T 70%;A 15"
+            (apply all three filters)
+
+    ***** TRIM OPTIONS *****
+    -trim_to_len <integer>
+            Trim all sequence from the 3'-end to result in sequence with
+            this length.
+
+    -trim_left <integer>
+            Trim sequence at the 5'-end by trim_left positions.
+
+    -trim_right <integer>
+            Trim sequence at the 3'-end by trim_right positions.
+
+    -trim_left_p <integer>
+            Trim sequence at the 5'-end by trim_left_p percentage of read
+            length. The trim length is rounded towards the lower integer
+            (e.g. 143.6 is rounded to 143 positions). Use an integer between
+            1 and 100 for the percentage value.
+
+    -trim_right_p <integer>
+            Trim sequence at the 3'-end by trim_right_p percentage of read
+            length. The trim length is rounded towards the lower integer
+            (e.g. 143.6 is rounded to 143 positions). Use an integer between
+            1 and 100 for the percentage value.
+
+    -trim_tail_left <integer>
+            Trim poly-A/T tail with a minimum length of trim_tail_left at
+            the 5'-end.
+
+    -trim_tail_right <integer>
+            Trim poly-A/T tail with a minimum length of trim_tail_right at
+            the 3'-end.
+
+    -trim_ns_left <integer>
+            Trim poly-N tail with a minimum length of trim_ns_left at the
+            5'-end.
+
+    -trim_ns_right <integer>
+            Trim poly-N tail with a minimum length of trim_ns_right at the
+            3'-end.
+
+    -trim_qual_left <integer>
+            Trim sequence by quality score from the 5'-end with this
+            threshold score.
+
+    -trim_qual_right <integer>
+            Trim sequence by quality score from the 3'-end with this
+            threshold score.
+
+    -trim_qual_type <string>
+            Type of quality score calculation to use. Allowed options are
+            min, mean, max and sum. [default: min]
+
+    -trim_qual_rule <string>
+            Rule to use to compare quality score to calculated value.
+            Allowed options are lt (less than), gt (greater than) and et
+            (equal to). [default: lt]
+
+    -trim_qual_window <integer>
+            The sliding window size used to calculate quality score by type.
+            To stop at the first base that fails the rule defined, use a
+            window size of 1. [default: 1]
+
+    -trim_qual_step <integer>
+            Step size used to move the sliding window. To move the window
+            over all quality scores without missing any, the step size
+            should be less or equal to the window size. [default: 1]
+
+    ***** REFORMAT OPTIONS *****
+    -seq_case <string>
+            Changes sequence character case to upper or lower case. Allowed
+            options are "upper" and "lower". Use this option to remove
+            soft-masking from your sequences.
+
+    -dna_rna <string>
+            Convert sequence between DNA and RNA. Allowed options are "dna"
+            (convert from RNA to DNA) and "rna" (convert from DNA to RNA).
+
+    -line_width <integer>
+            Sequence characters per line. Use 0 if you want each sequence in
+            a single line. Use 80 for line breaks every 80 characters. Note
+            that this option only applies to FASTA output files, since FASTQ
+            files store sequences without additional line breaks. [default:
+            60]
+
+    -rm_header
+            Remove the sequence header. This includes everything after the
+            sequence identifier (which is kept unchanged).
+
+    -seq_id <string>
+            Rename the sequence identifier. A counter is added to each
+            identifier to assure its uniqueness. Use option -seq_id_mappings
+            to generate a file containing the old and new identifiers for
+            later reference.
+
+            Example: "mySeq_10" will generate the IDs (in FASTA format)
+            >mySeq_101, >mySeq_102, >mySeq_103, ...
+
+    ***** SUMMARY STATISTIC OPTIONS *****
+            The summary statistic values are written to STDOUT in the form:
+            "parameter_name statistic_name value" (without the quotes). For
+            example, "stats_info reads 10000" or "stats_len max 500". Only
+            one statistic is written per line and values are separated by
+            tabs.
+
+            If you specify any statistic option, no other ouput will be
+            generated. To preprocess data, do not specify a statistics
+            option.
+
+    -stats_info
+            Outputs basic information such as number of reads (reads) and
+            total bases (bases).
+
+    -stats_len
+            Outputs minimum (min), maximum (max), range (range), mean
+            (mean), standard deviation (stddev), mode (mode) and mode value
+            (modeval), and median (median) for read length.
+
+    -stats_dinuc
+            Outputs the dinucleotide odds ratio for AA/TT (aatt), AC/GT
+            (acgt), AG/CT (agct), AT (at), CA/TG (catg), CC/GG (ccgg), CG
+            (cg), GA/TC (gatc), GC (gc) and TA (ta).
+
+    -stats_tag
+            Outputs the probability of a tag sequence at the 5'-end (prob5)
+            and 3'-end (prob3) in percentage (0..100). Provides the number
+            of predefined MIDs (midnum) and the MID sequences (midseq,
+            separated by comma, only provided if midnum > 0) that occur in
+            more than 34/100 (approx. 3%) of the reads.
+
+    -stats_dupl
+            Outputs the number of exact duplicates (exact), 5' duplicates
+            (5), 3' duplicates (3), exact duplicates with reverse
+            complements (exactrevcom) and 5'/3' duplicates with reverse
+            complements (revcomp), and total number of duplicates (total).
+            The maximum number of duplicates is given under the value name
+            with an additional "maxd" (e.g. exactmaxd or 5maxd).
+
+    -stats_ns
+            Outputs the number of reads with ambiguous base N (seqswithn),
+            the maximum number of Ns per read (maxn) and the maximum
+            percentage of Ns per read (maxp). The maxn and maxp value are
+            not necessary from the same sequence.
+
+    -stats_assembly
+            Outputs the N50, N90, etc contig sizes. The Nxx contig size is a
+            weighted median that is defined as the length of the smallest
+            contig C in the sorted list of all contigs where the cumulative
+            length from the largest contig to contig C is at least xx% of
+            the total length (sum of contig lengths).
+
+    -stats_all
+            Outputs all available summary statistics.
+
+    ***** ORDER OF PROCESSING *****
+            The available options are processed in the following order:
+
+            seq_num, trim_left, trim_right, trim_left_p, trim_right_p,
+            trim_qual_left, trim_qual_right, trim_tail_left,
+            trim_tail_right, trim_ns_left, trim_ns_right, trim_to_len,
+            min_len, max_len, range_len, min_qual_score, max_qual_score,
+            min_qual_mean, max_qual_mean, min_gc, max_gc, range_gc,
+            ns_max_p, ns_max_n, noniupac, lc_method, derep, seq_id,
+            seq_case, dna_rna, out_format
+

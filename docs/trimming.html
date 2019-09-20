@@ -233,18 +233,29 @@ sequencing platforms</p>
 </div>
 <div class="section" id="prinseq">
 <h3>PRINSEQ:<a class="headerlink" href="#prinseq" title="Permalink to this headline">¶</a></h3>
-<p>Lots of different graphical outputs.</p>
+<p>One of the big advantages of prinseq are the large number of different graphical outputs. See <a class="reference download internal" download="" href="_downloads/305c55c36ef50a0a6dc6ddf3de1f358b/prinseq.txt"><code class="xref download docutils literal notranslate"><span class="pre">Prinseq</span> <span class="pre">help</span></code></a>.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>perl prinseq-lite.pl -verbose -fastq test_1.fq -fastq2 test_2.fq -ns_max_n <span class="m">0</span> -out_good test_no_ns -out_bad test_with_ns
 </pre></div>
 </div>
 <p>Singletons will automatically be filtered and stored in separate files (here test_no_ns_1_singletons.fastq and test_no_ns_2_singletons.fastq)
 in addition to the files test_no_ns_1.fastq, test_no_ns_2.fastq, test_with_ns_1.fastq, and test_with_ns_2.fastq.</p>
-<p><strong>Disadvantages:</strong> No direct way of dealing with paired end that are zipped.</p>
+<p><strong>Disadvantages:</strong> No direct way of dealing with paired end that are zipped, you will need to unzip on the fly:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>/prinseq &lt;your parameters&gt; &lt;<span class="o">(</span>gzip -d -c input.fq.gz<span class="o">)</span>
+</pre></div>
+</div>
+<p>Or if you have paired-end, you need to unzip-trim (zip if you want to keep your reads compressed) and then match the pairs up again (<a class="reference external" href="https://github.com/sestaton/Pairfq">https://github.com/sestaton/Pairfq</a>)</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gzip -dc input_R1.fastq.gz <span class="p">|</span> prinseq-lite.pl -fastq stdin -out_bad null -out_good stdout <span class="se">\</span>
+  -trim_qual_right <span class="m">20</span> -min_qual_mean <span class="m">20</span> -min_len <span class="m">35</span> -log prinseq.input_R1.log <span class="p">|</span> gzip &gt; input_R1.trim.gz
+gzip -dc input_2.fastq.gz <span class="p">|</span> prinseq-lite.pl -fastq stdin -out_bad null -out_good stdout <span class="se">\</span>
+  -trim_qual_right <span class="m">20</span> -min_qual_mean <span class="m">20</span> -min_len <span class="m">35</span> -log prinseq.input_R2.log <span class="p">|</span> gzip &gt; input_R2.trim.gz
+pairfq makepairs -f input_R1.trim.gz -r input_R2.trim.gz -fp output_R1.trim.fastq-common.out.gz <span class="se">\</span>
+  -rp output_R2.trim.fastq-common.out.gz -fs output_R1.trim.fastq-unique.out.gz -rs output_R2.trim.fastq-unique.out.gz --compress gzip
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="benchmark">
 <h2>Benchmark<a class="headerlink" href="#benchmark" title="Permalink to this headline">¶</a></h2>
-<p>Benchmark by time, memory usage</p>
 <p>Commands used for benchmarking:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>btrim64 -a <span class="m">25</span> -l <span class="m">50</span> -q -s tmp.r1.s -o output_R1 -t input_R1.fastq.gz
 btrim64 -a <span class="m">25</span> -l <span class="m">50</span> -q -s tmp.r2.s -o output_R2 -t input_R2.fastq.gz
@@ -261,12 +272,42 @@ mv output_R2.pe output_R2.fastq
 cutadapt -m <span class="m">50</span> -q <span class="m">25</span> -o rescued.a.fastq.gz tooshort.1.fastq.gz
 cutadapt -m <span class="m">50</span> -q <span class="m">25</span> -o rescued.b.fastq.gz tooshort.2.fastq.gz
 cat  rescued.a.fastq.gz rescued.b.fastq.gz &gt; rescued.fastq.gz
-gunzip -c rescued.fastq.gz &gt; <span class="o">{</span>output.cutadaptsingle<span class="o">}</span>
-gunzip -c output_R1.fastq.gz &gt; <span class="o">{</span>output.cutadapt1<span class="o">}</span>
-gunzip -c output_R2.fastq.gz &gt; <span class="o">{</span>output.cutadapt2<span class="o">}</span>
+gunzip -c rescued.fastq.gz &gt; output_unpaired.fastq
+gunzip -c output_R1.fastq.gz &gt; output_R1.fastq
+gunzip -c output_R2.fastq.gz &gt; output_R2.fastq
 </pre></div>
 </div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>flexbar -r input_R1.fastq.gz -p input_R2.fastq.gz -qt <span class="m">25</span> -m <span class="m">50</span> -qf i1.8 --adapter-preset TruSeq -ap ON -s
+mv flexbarOut_1.fastq output_R1.fastq
+mv flexbarOut_2.fastq output_R2.fastq
+cat flexbarOut_1_single.fastq flexbarOut_2_single.fastq &gt; output_unpaired.fastq
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gunzip -c input_R1.fastq.gz &gt; tmp_R1.fq
+gunzip -c input_R2.fastq.gz &gt; tmp_R2.fq
+prinseq-lite.pl -verbose -min_qual_mean <span class="m">25</span> -min_len <span class="m">50</span> -fastq tmp_R1.fq -fastq2 tmp_R2.fq -ns_max_n <span class="m">0</span> -out_good tmp_no_ns -out_bad null
+cat tmp_no_ns_1_singletons.fastq tmp_no_ns_2_singletons.fastq &gt; output_unpaired.fastq
+mv tmp_no_ns_1.fastq output_R1.fastq
+mv tmp_no_ns_2.fastq output_R2.fastq
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>TrimmomaticPE -phred33 input_R1.fastq.gz input_R2.fastq.gz output_R1.fastq tmp1_unpaired.fq output_R1.fastq tmp2_unpaired.fq ILLUMINACLIP:TruSeq2-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:5:25 MINLEN:50
+cat tmp1_unpaired.fq tmp2_unpaired.fq &gt; output_unpaired.fastq
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>trim_galore --quality <span class="m">25</span> --length <span class="m">50</span> --retain_unpaired --stringency <span class="m">1</span> --dont_gzip --paired input_R1.fastq.gz input_R2.fastq.gz
+cat input_R1_unpaired_1.fq input_R2_unpaired_2.fq &gt; output_unpaired.fastq
+mv input_R1_001_val_1.fq output_R1.fastq
+mv input_R2_001_val_2.fq output_R2.fastq
+</pre></div>
+</div>
+<div class="section" id="benchmarking-by-time">
+<h3>Benchmarking by time<a class="headerlink" href="#benchmarking-by-time" title="Permalink to this headline">¶</a></h3>
 <img alt="_images/time_plot.png" src="_images/time_plot.png" />
+<p>btrim &lt; cutadapt &lt; trimgalore &lt; trimmomatic</p>
+</div>
+<div class="section" id="benchmarking-by-reads-removed">
+<h3>Benchmarking by reads removed<a class="headerlink" href="#benchmarking-by-reads-removed" title="Permalink to this headline">¶</a></h3>
 <p id="bibtex-bibliography-trimming-0"><table class="docutils citation" frame="void" id="aronesty2013" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
@@ -352,6 +393,7 @@ gunzip -c output_R2.fastq.gz &gt; <span class="o">{</span>output.cutadapt2<span 
 </tbody>
 </table>
 </p>
+</div>
 </div>
 </div>
 
