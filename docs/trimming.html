@@ -257,6 +257,8 @@ pairfq makepairs -f input_R1.trim.gz -r input_R2.trim.gz -fp output_R1.trim.fast
 </div>
 <div class="section" id="benchmark">
 <h2>Benchmark<a class="headerlink" href="#benchmark" title="Permalink to this headline">¶</a></h2>
+<p>Current benchmarking pipeline:</p>
+<img alt="_images/dag.png" src="_images/dag.png" />
 <p>Commands used for benchmarking:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>btrim64 -a <span class="m">25</span> -l <span class="m">50</span> -q -s tmp.r1.s -o output_R1 -t input_R1.fastq.gz
 btrim64 -a <span class="m">25</span> -l <span class="m">50</span> -q -s tmp.r2.s -o output_R2 -t input_R2.fastq.gz

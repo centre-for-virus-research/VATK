@@ -243,6 +243,10 @@ Or if you have paired-end, you need to unzip-trim (zip if you want to keep your 
 Benchmark
 #########
 
+Current benchmarking pipeline:
+
+.. image:: dag.png
+
 
 Commands used for benchmarking:
 
