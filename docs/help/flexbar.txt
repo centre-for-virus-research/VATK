@@ -1,0 +1,211 @@
+flexbar - flexible barcode and adapter removal
+==============================================
+
+SYNOPSIS
+    flexbar -r reads [-b barcodes] [-a adapters] [options]
+
+DESCRIPTION
+    The program Flexbar preprocesses high-throughput sequencing data efficiently. It demultiplexes barcoded runs and
+    removes adapter sequences. Several adapter removal presets for Illumina libraries are included. Flexbar computes
+    exact overlap alignments using SIMD and multicore parallelism. Moreover, trimming and filtering features are
+    provided, e.g. trimming of homopolymers at read ends. Flexbar increases read mapping rates and improves genome as
+    well as transcriptome assemblies. Unique molecular identifiers can be extracted in a flexible way. The software
+    supports data in fasta and fastq format from multiple sequencing platforms. Refer to the manual on
+    github.com/seqan/flexbar/wiki or contact Johannes Roehr on github.com/jtroehr for support with this application.
+
+OPTIONS
+    -h, --help
+          Display the help message.
+    -hh, --full-help
+          Display the help message with advanced options.
+    --version-check BOOL
+          Turn this option off to disable version update notifications of the application. One of 1, ON, TRUE, T, YES,
+          0, OFF, FALSE, F, and NO. Default: 1.
+    -hm, --man-help
+          Print advanced options as man document.
+    -v, --versions
+          Print Flexbar and SeqAn version numbers.
+    -c, --cite
+          Show program references for citation.
+
+  Basic options:
+    -n, --threads INTEGER
+          Number of threads to employ. Default: 1.
+    -N, --bundle INTEGER
+          Number of (paired) reads per thread. Default: 256.
+    -M, --bundles INTEGER
+          Process only certain number of bundles for testing.
+    -t, --target OUTPUT_PREFIX
+          Prefix for output file names or paths. Default: flexbarOut.
+    -r, --reads INPUT_FILE
+          Fasta/q file or stdin (-) with reads that may contain barcodes.
+    -p, --reads2 INPUT_FILE
+          Second input file of paired reads, gz and bz2 files supported.
+    -i, --interleaved
+          Interleaved format for first input set with paired reads.
+    -I, --iupac
+          Accept iupac symbols in reads and convert to N if not ATCG.
+
+  Barcode detection:
+    -b, --barcodes INPUT_FILE
+          Fasta file with barcodes for demultiplexing, may contain N.
+    -b2, --barcodes2 INPUT_FILE
+          Additional barcodes file for second read set in paired mode.
+    -br, --barcode-reads INPUT_FILE
+          Fasta/q file containing separate barcode reads for detection.
+    -bo, --barcode-min-overlap INTEGER
+          Minimum overlap of barcode and read. Default: barcode length.
+    -be, --barcode-error-rate DOUBLE
+          Error rate threshold for mismatches and gaps. Default: 0.0.
+    -bt, --barcode-trim-end STRING
+          Type of detection, see section trim-end modes. Default: LTAIL.
+    -bn, --barcode-tail-length INTEGER
+          Region size in tail trim-end modes. Default: barcode length.
+    -bk, --barcode-keep
+          Keep barcodes within reads instead of removal.
+    -bu, --barcode-unassigned
+          Include unassigned reads in output generation.
+    -bm, --barcode-match INTEGER
+          Alignment match score. Default: 1.
+    -bi, --barcode-mismatch INTEGER
+          Alignment mismatch score. Default: -1.
+    -bg, --barcode-gap INTEGER
+          Alignment gap score. Default: -9.
+
+  Adapter removal:
+    -a, --adapters INPUT_FILE
+          Fasta file with adapters for removal that may contain N.
+    -a2, --adapters2 INPUT_FILE
+          File with extra adapters for second read set in paired mode.
+    -as, --adapter-seq STRING
+          Single adapter sequence as alternative to adapters option.
+    -aa, --adapter-preset STRING
+          One of TruSeq, SmallRNA, Methyl, Ribo, Nextera, and NexteraMP.
+    -ao, --adapter-min-overlap INTEGER
+          Minimum overlap for removal without pair overlap. Default: 3.
+    -ae, --adapter-error-rate DOUBLE
+          Error rate threshold for mismatches and gaps. Default: 0.1.
+    -at, --adapter-trim-end STRING
+          Type of removal, see section trim-end modes. Default: RIGHT.
+    -an, --adapter-tail-length INTEGER
+          Region size for tail trim-end modes. Default: adapter length.
+    -ax, --adapter-relaxed
+          Skip restriction to pass read ends in right and left modes.
+    -ap, --adapter-pair-overlap STRING
+          Overlap detection of paired reads. One of ON, SHORT, and ONLY.
+    -av, --adapter-min-poverlap INTEGER
+          Minimum overlap of paired reads for detection. Default: 40.
+    -ac, --adapter-revcomp STRING
+          Include reverse complements of adapters. One of ON and ONLY.
+    -ad, --adapter-revcomp-end STRING
+          Use different trim-end for reverse complements of adapters.
+    -ab, --adapter-add-barcode
+          Add reverse complement of detected barcode to adapters.
+    -ar, --adapter-read-set STRING
+          Consider only single read set for adapters. One of 1 and 2.
+    -ak, --adapter-trimmed-out STRING
+          Modify that trimmed reads are kept. One of OFF and ONLY.
+    -ay, --adapter-cycles INTEGER
+          Number of adapter removal cycles. Default: 1.
+    -am, --adapter-match INTEGER
+          Alignment match score. Default: 1.
+    -ai, --adapter-mismatch INTEGER
+          Alignment mismatch score. Default: -1.
+    -ag, --adapter-gap INTEGER
+          Alignment gap score. Default: -6.
+
+  Filtering and trimming:
+    -u, --max-uncalled INTEGER
+          Allowed uncalled bases N for each read. Default: 0.
+    -x, --pre-trim-left INTEGER
+          Trim given number of bases on 5' read end before detection.
+    -y, --pre-trim-right INTEGER
+          Trim specified number of bases on 3' end prior to detection.
+    -k, --post-trim-length INTEGER
+          Trim to specified read length from 3' end after removal.
+    -m, --min-read-length INTEGER
+          Minimum read length to remain after removal. Default: 18.
+
+  Quality-based trimming:
+    -q, --qtrim STRING
+          Quality-based trimming mode. One of TAIL, WIN, and BWA.
+    -qf, --qtrim-format STRING
+          Quality format. One of sanger, solexa, i1.3, i1.5, and i1.8.
+    -qt, --qtrim-threshold INTEGER
+          Minimum quality as threshold for trimming. Default: 20.
+    -qw, --qtrim-win-size INTEGER
+          Region size for sliding window approach. Default: 5.
+    -qa, --qtrim-post-removal
+          Perform quality-based trimming after removal steps.
+
+  Trimming of homopolymers:
+    -hl, --htrim-left STRING
+          Trim specific homopolymers on left read end after removal.
+    -hr, --htrim-right STRING
+          Trim certain homopolymers on right read end after removal.
+    -hi, --htrim-min-length INTEGER
+          Minimum length of homopolymers at read ends. Default: 3.
+    -h2, --htrim-min-length2 INTEGER
+          Minimum length for homopolymers specified after first one.
+    -hx, --htrim-max-length INTEGER
+          Maximum length of homopolymers on left and right read end.
+    -hf, --htrim-max-first
+          Apply maximum length of homopolymers only for first one.
+    -he, --htrim-error-rate DOUBLE
+          Error rate threshold for mismatches. Default: 0.1.
+    -ha, --htrim-adapter
+          Trim only in case of adapter removal on same side.
+
+  Output selection:
+    -f, --fasta-output
+          Prefer non-quality format fasta for output.
+    -z, --zip-output STRING
+          Direct compression of output files. One of GZ and BZ2.
+    -1, --stdout-reads
+          Write reads to stdout, tagged and interleaved if needed.
+    -R, --output-reads OUTPUT_FILE
+          Output file for reads instead of target prefix usage.
+    -P, --output-reads2 OUTPUT_FILE
+          Output file for reads2 instead of target prefix usage.
+    -j, --length-dist
+          Generate length distribution for read output files.
+    -s, --single-reads
+          Write single reads for too short counterparts in pairs.
+    -S, --single-reads-paired
+          Write paired single reads with N for short counterparts.
+
+  Logging and tagging:
+    -l, --align-log STRING
+          Print chosen read alignments. One of ALL, MOD, and TAB.
+    -o, --stdout-log
+          Write statistics to stdout instead of target log file.
+    -O, --output-log OUTPUT_FILE
+          Output file for logging instead of target prefix usage.
+    -g, --removal-tags
+          Tag reads that are subject to adapter or barcode removal.
+    -e, --number-tags
+          Replace read tags by ascending number to save space.
+    -d, --umi-tags
+          Capture UMIs in reads at barcode or adapter N positions.
+
+TRIM-END MODES
+    ANY: longer side of read remains after removal of overlap
+    LEFT: right side remains after removal, align <= read end
+    RIGHT: left part remains after removal, align >= read start
+    LTAIL: consider first n bases of reads in alignment
+    RTAIL: use only last n bases, see tail-length options
+
+EXAMPLES
+    flexbar -r reads.fq -t target -q TAIL -qf i1.8
+    flexbar -r reads.fq -b barcodes.fa -bt LTAIL
+    flexbar -r reads.fq -a adapters.fa -ao 3 -ae 0.1
+    flexbar -r r1.fq -p r2.fq -a a1.fa -a2 a2.fa -ap ON
+    flexbar -r r1.fq -p r2.fq -aa TruSeq -ap ON
+
+VERSION
+    Last update: May 2019
+    flexbar version: 3.5.0
+    SeqAn version: 2.4.0
+
+Available on github.com/seqan/flexbar
+

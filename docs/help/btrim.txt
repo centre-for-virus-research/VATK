@@ -1,0 +1,40 @@
+btrim64: -q -p <pattern file> -t <fastq file> -o <trim file> [-u 5'-error -v 3'-error -l minlen -b <5'-cut> -e <3'-cut> -w <window> -a <average> -f <5'-trim> -I]
+
+Required for pattern trimming:
+	-p <pattern file>	each line contains one pair of 5'- and 3'-adaptors; ignored if -q in effect
+	-t <sequence file>	fastq file to be trimmed
+	-o <output file>	fastq file of trimmed sequences
+
+Required for quality trimming (-q in effect):
+	-t <sequence file>	fastq file to be trimmed
+	-o <output file>	fastq file of trimmed sequences
+
+Optional:
+	-q	toggle to quality trimming [default=adaptor trimming]
+	-3	3'-adaptor trimming only [default=off]
+	-P	pass if no adaptor is found [default=off]
+	-Q	do a quality trimming even if adaptor is found [default=off]
+	-s <summary file>	detailed trimming info for each sequence
+	-u <5'-error>	maximum number of errors in 5'-adaptor [default=3]
+	-v <3'-error>	maximum number of errors in 3'-adaptor [default=4]
+	-l <minimal length>	minimal insert size [default=25]
+	-b <5'-range>	the length of sequence to look for 5'-adaptor at the beginning of the sequence [default=1.3 x adaptor length]
+	-e <3'-range>	the starting position to look for 3'-adaptor at the end of the sequence [default: the 5'-trimming point]
+	-w <window size>	size of moving window for quality trimming [default=5]
+	-a <average quality>	cutoff for average quality scores within the moving window for quality trimming [default=15]
+	-f <5'-trim>	number of bases to be trimmed at 5'-end [default=0]
+	-I	toggle to case sensitive search [default=case insensitive]
+	-c	toggle to check fastq file [default=no check]
+	-i	toggle to fastq format with phred_offset=64 [default=phred_offset=33]
+	-B	barcode assignment
+	-k	keep all reads in the same output file specified by -o, even for failed reads (if -B is used, the reads are put in a file named "failed_reads_pid.fastq" (where pid is the process id) in the current directory; -K can be used for another file name) [default=no] 
+	-K <output file>	keep failed reads in a separate output file (overwrites -k)
+	-z	compress the output file [default=no]
+	-Z <zip command + options>	zip command and options (put the entire command and option within quotes) [default="/bin/gzip -f"]
+	-T	3'-end search first, then the best match's 5'-adaptor is used for 5'-end search [default=5'-end search first]
+	-C	when this option is used, don't check input sequence file and assume it is not zipped; useful if named pipe is used, such as -t <(gunzip -c *.gz) [default: check zipped or unzipped automatically]
+
+
+Author: Yong Kong
+Reference: Kong, Y (2011) Btrim: A fast, lightweight adapter and quality trimming program for next-generation sequencing technologies, Genomics, 98, 152-153.
+Contact: yong.kong@yale.edu

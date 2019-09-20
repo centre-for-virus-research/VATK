@@ -97,7 +97,7 @@ Btrim:
 
 Trims low quality at both or either ends of a fastq sequence, identify barcodes, 
 handle indels in adapters and barcodes. The adaptors are provided as a 6 column text-tab delimited 
-file where the user can specify which region in the sequence to search for adaptors in.
+file where the user can specify which region in the sequence to search for adaptors in. See `btrim64 <help/btrim.txt>`_.
 To trim Illumina adaptor AGATCGGAAGAGC with a window size of 10 and a cutoff for average 
 quality scores within the moving window for quality trimming of 25, where only 3'-end trimming is 
 carried out, keeping a minimal length sequence of 40:
@@ -139,7 +139,7 @@ ConDeTri:
 ---------
 
 Single-end and paired-end trimming independent from user 
-interaction, trim and remove reads with low quality scores.
+interaction, trim and remove reads with low quality scores. See  `condetri_v2.2.pl -h <help/condetri.txt>`_
 
 .. code-block:: bash
 
@@ -164,6 +164,8 @@ interaction, trim and remove reads with low quality scores.
 
 Cutadapt:
 ---------
+
+See `cutadapt -help <help/cutadapt.txt>`_
 
 .. code-block:: bash
 
@@ -204,12 +206,12 @@ and multicore parallelism. Moreover, trimming and filtering features are provide
 trimming of homopolymers at read ends. Flexbar increases read mapping rates and improves 
 genome as well as transcriptome assemblies. Unique molecular identifiers can be extracted 
 in a flexible way. The software supports data in fasta and fastq format from multiple 
-sequencing platforms
+sequencing platforms. See `flexbar -hh <help/flexbar.txt>`_
 
 PRINSEQ:
 --------
 
-One of the big advantages of prinseq are the large number of different graphical outputs. See `Prinseq help <help/prinseq.txt>`_
+One of the big advantages of prinseq are the large number of different graphical outputs. See `prinseq-lite.pl -help <help/prinseq.txt>`_
 
 .. code-block:: bash
 

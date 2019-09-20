@@ -1,0 +1,34 @@
+# condetri.pl
+# September 2010
+# Version 2.2, June 2012
+# Author: Linnéa Smeds (linnea.smeds@ebc.uu.se)
+# ---------------------------------------------------------------------------------
+# Description: Trim reads from the 3'-end and extract reads (or read pairs) of
+# good quality. If the reads are paired, the filtering is done pairwise, and 
+# if one read in a pair has low quality, the remaning read is saved as single end.
+# Usage: perl condetri.pl -fastq1=file1 [-fastq2=file2 -prefix=s -cutfirst=i 
+# -rmN -hq=i -lq=i -frac=i -lfrac=i -minlen=i -mh=i -ml=i -sc=i -pb=s]
+
+-fastq1=file 	 Fastq(.gz) file. If a second file is given, the files are trimmed
+-fastq2=file 	 as a pair. The reads must have the same order in both files.
+-prefix=string 	 Prefix for the output file(s). The filtered fastq file(s) will
+ 		 be named prefix_trim1.fastq (and prefix_trim2.fastq if present). For pairs,
+ 		 a third file will be given with unpaired reads (reads from pairs where one 
+ 		 low quality read has been removed).
+-cutfirst=i 	 Remove i first bases from the 5'end [0].
+-rmN 		 Remove non-ATCG bases from 5'end before any trimming [no].
+-hq=i 		 Hiqh quality threshold [25].
+-lq=i 		 Low quality threshold [10].
+-frac=[0,1]	 Fraction of read that must exceed hq [0.8].
+-lfrac=[0,1]	 Maximum fraction of reads with qual<lq [0].
+-minlen=i 	 Min allowed read length [50].
+-mh=i 		 When this no of sequential hq bases is reached, the trimming stops [5].
+-ml=i 		 Max no of lq bases allowed after a stretch of hq bases from 3'-end [1].
+-sc=i		 Scoring table, Score=ASCII-sc, 64 for Solexa and Illumina 1.3+ and
+ 		 Illumina 1.5+, 33 for Sanger and newer Illumina data (from 1.8+). [64].
+-pb=fa|fq	 Print the removed low quality reads to a fasta file or a fastq
+		 file (for investigation/evaluation purposes) [no].
+-q 		 Print Solexa/Illumina scoring table (64 offset).
+-q33 		 Print Sanger/new Illumina scoring table (33 offset).
+-h 		 Print this help message.
+
