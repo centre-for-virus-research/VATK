@@ -243,7 +243,7 @@ Or if you have paired-end, you need to unzip-trim (zip if you want to keep your 
 Benchmark
 #########
 
-Current benchmarking pipeline available here :vatk:`trimming/trimming.rst`:
+Current benchmarking pipeline available here :vatk:`trimming/trimtest.snake <trimming/trimtest.snake>`
 
 .. image:: dag.png
 
