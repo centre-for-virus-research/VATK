@@ -1,0 +1,340 @@
+"""
+Author: J. Hughes
+Affiliation: CVR Bioinformatics
+Aim: A Snakemake workflow to compare different programs for trimming.
+Date: 15 Aug 2019
+Run: snakemake -p --snakefile trimtest.snake
+Latest modification: 
+  - todo
+  bbduk.sh trimming https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide/
+  fastp trimming
+  
+  View the DAG: snakemake --forceall --rulegraph --snakefile trimtest.snake | dot -Tpng > dag.png
+"""
+
+##-----------------------------------------------##
+## Working directory                             ##
+## Adapt to your needs                           ##
+##-----------------------------------------------##
+
+BASE_DIR = "/home1/hugh01j/bin/VATK/"
+WDIR = BASE_DIR + "/trimming"
+workdir: WDIR
+message: "The current working directory is " + WDIR
+
+##--------------------------------------------------------------------------------------##
+## The list of samples to be processed
+##--------------------------------------------------------------------------------------##
+SAMPLES, = glob_wildcards("../../../Documents/VirusAssemblathon/Ranavirus/{smp}_L001_R1_001.fastq.gz")
+GROUP = ["prinseq","btrim","cutadapt","condetri","flexbar","trimmomatic","trimgalore"]
+NB_SAMPLES = len(SAMPLES)
+
+
+for smp in SAMPLES:
+  message: "Sample " + smp + " will be processed"
+
+rule all: 
+  input: 
+#      expand("trimmed/{smp}_prinseq_R1.fastq", smp=SAMPLES),
+#      expand("trimmed/{smp}_btrim_R1.fastq", smp=SAMPLES),
+#      expand("trimmed/{smp}_condetri_R1.fastq", smp=SAMPLES),
+#      expand("trimmed/{smp}_cutadapt_R1.fastq.gz", smp=SAMPLES),
+#      expand("trimmed/{smp}_flexbar_R1.fastq", smp=SAMPLES),
+#      expand("trimmed/{smp}_trimmomatic_R1.fastq", smp=SAMPLES),
+#      expand("trimmed/{smp}_trimgalore_R1.fastq", smp=SAMPLES),
+      "time_plot.png",
+#      expand("mapped_reads/{smp}_{group}.bam", smp=SAMPLES, group=GROUP),
+      expand("diversi/{smp}_{group}_entropy.txt", smp=SAMPLES, group=GROUP),
+#      expand("qual/{smp}_{group}_paired.txt", smp=SAMPLES, group=GROUP),
+      "qual_plot.png",
+      "count_plot.png",
+      "mismatch_plot.png"
+
+rule btrim:
+    input:
+        r1="../../../Documents/VirusAssemblathon/Ranavirus/{smp}_L001_R1_001.fastq.gz",
+        r2="../../../Documents/VirusAssemblathon/Ranavirus/{smp}_L001_R2_001.fastq.gz"
+    output:
+        singler="trimmed/{smp}_btrim_unpaired.fastq",
+        per1="trimmed/{smp}_btrim_R1.fastq",
+        per2="trimmed/{smp}_btrim_R2.fastq"
+    log:
+        "log/{smp}.btrim.log"
+    benchmark:
+        "benchmarks/{smp}.btrim.txt"
+    params:
+        summary1=temp("tmp.r1.s"),
+        summary2=temp("tmp.r2.s"),
+        prefix1=temp("tmp.r1.btrim64"),
+        prefix2=temp("tmp.r2.btrim64")
+    shell:"""
+        btrim/btrim64 -a 25 -l 50 -q -s {params.summary1} -o {params.prefix1} -t {input.r1} 2> {log}
+        btrim/btrim64 -a 25 -l 50 -q -s {params.summary2} -o {params.prefix2} -t {input.r2} 2> {log}
+        btrim/paired_end_trim.pl {params.summary1} {params.summary2} {params.prefix1} {params.prefix2} 2> {log}
+        cat tmp.r1.btrim64.se tmp.r2.btrim64.se > {output.singler}
+        rm tmp.r1.btrim64.se 
+        rm tmp.r2.btrim64.se
+        mv tmp.r1.btrim64.pe {output.per1}
+        mv tmp.r2.btrim64.pe {output.per2}
+    """
+         
+rule condetri:
+    input:
+        r1="../../../Documents/VirusAssemblathon/Ranavirus/{smp}_L001_R1_001.fastq.gz",
+        r2="../../../Documents/VirusAssemblathon/Ranavirus/{smp}_L001_R2_001.fastq.gz"
+    output:
+        condetri1="trimmed/{smp}_condetri_R1.fastq",
+        condetri2="trimmed/{smp}_condetri_R2.fastq",
+        condetris="trimmed/{smp}_condetri_unpaired.fastq"
+    log:
+        "log/{smp}.condetri.log"
+    benchmark:
+        "benchmarks/{smp}.condetri.txt"
+    params:
+        tmp=temp("tmp"),
+        tmp1=temp("tmp_trim1.fastq"),
+        tmp2=temp("tmp_trim2.fastq"),
+        tmps=temp("tmp_trim_unpaired.fastq"),
+    shell:"""
+      ./condetri/condetri.pl -sc=33 -fastq1={input.r1} -fastq2={input.r2} -prefix={params.tmp} 2> {log}
+      mv {params.tmp1} {output.condetri1}
+      mv {params.tmp2} {output.condetri2}
+      mv {params.tmps} {output.condetris}
+    """
+    
+rule cutadapt:
+    input:
+        r1="../../../Documents/VirusAssemblathon/Ranavirus/{smp}_L001_R1_001.fastq.gz",
+        r2="../../../Documents/VirusAssemblathon/Ranavirus/{smp}_L001_R2_001.fastq.gz"
+    output:
+        cutadapt1="trimmed/{smp}_cutadapt_R1.fastq",
+        cutadapt2="trimmed/{smp}_cutadapt_R2.fastq",
+        cutadaptsingle="trimmed/{smp}_cutadapt_unpaired.fastq",
+    log:
+        "log/{smp}.cutadapt.log"
+    benchmark:
+        "benchmarks/{smp}.cutadapt.txt"
+    params:
+        short1=temp("tooshort.1.fastq.gz"),
+        short2=temp("tooshort.2.fastq.gz"),
+        out1=temp("output_R1.fastq.gz"),
+        out2=temp("output_R2.fastq.gz"),
+        rescuea=temp("rescued.a.fastq.gz"),
+        rescueb=temp("rescued.b.fastq.gz"),
+        rescue=temp("rescued.fastq.gz")
+    shell:"""
+        /home1/hugh01j/.local/bin/cutadapt -m 50 -q 25 -o {params.out1} -p {params.out2} --too-short-output={params.short1} --too-short-paired-output={params.short2} {input.r1} {input.r2} 2> {log}
+        /home1/hugh01j/.local/bin/cutadapt -m 50 -q 25 -o {params.rescuea} {params.short1} 
+        /home1/hugh01j/.local/bin/cutadapt -m 50 -q 25 -o {params.rescueb} {params.short2} 
+        cat  {params.rescuea} {params.rescueb} > {params.rescue}
+        gunzip -c {params.rescue} > {output.cutadaptsingle}
+        gunzip -c {params.out1} > {output.cutadapt1}
+        gunzip -c {params.out2} > {output.cutadapt2}
+    """
+
+
+# default:
+# flexbar-3.5.0/flexbar -r ../../../Documents/VirusAssemblathon/Ranavirus/Rana-01_S1_L001_R1_001.fastq.gz -p ../../../Documents/VirusAssemblathon/Ranavirus/Rana-01_S1_L001_R2_001.fastq.gz -qf i1.8 
+
+rule flexbar:
+    input:
+        r1="../../../Documents/VirusAssemblathon/Ranavirus/{smp}_L001_R1_001.fastq.gz",
+        r2="../../../Documents/VirusAssemblathon/Ranavirus/{smp}_L001_R2_001.fastq.gz"
+    output:
+        flexbar1="trimmed/{smp}_flexbar_R1.fastq",
+        flexbar2="trimmed/{smp}_flexbar_R2.fastq",
+        flexbars="trimmed/{smp}_flexbar_unpaired.fastq"
+    log:
+        "log/{smp}.flexbar.log"
+    benchmark:
+        "benchmarks/{smp}.flexbar.txt"
+    params:
+        single1=temp("flexbarOut_1_single.fastq"),
+        single2=temp("flexbarOut_2_single.fastq"),
+        out1=temp("flexbarOut_1.fastq"),
+        out2=temp("flexbarOut_2.fastq")
+    shell:"""
+        #flexbar -r {input.r1} -p {input.r2} -qt 25 -m 50 -qf i1.8 --adapter-preset TruSeq -ap ON -R {output.flexbar1} -P {output.flexbar2} -s
+        flexbar -r {input.r1} -p {input.r2} -qt 25 -m 50 -qf i1.8 --adapter-preset TruSeq -ap ON -s
+        mv {params.out1} {output.flexbar1}
+        mv {params.out2} {output.flexbar2}
+        cat {params.single1} {params.single2} > {output.flexbars}
+    """
+
+
+
+# rule unzip:
+#     input:
+#         gzr1="../../../Documents/VirusAssemblathon/Ranavirus/{smp}_L001_R1_001.fastq.gz",
+#         gzr2="../../../Documents/VirusAssemblathon/Ranavirus/{smp}_L001_R2_001.fastq.gz"
+#     output:
+#         seq1="{smp}_R1.fastq",
+#         seq2="{smp}_R2.fastq"
+#     shell:"""
+#         gunzip -c {input.gzr1} > {output.seq1},
+#         gunzip -c {input.gzr2} > {output.seq2}
+#     """
+ 
+rule prinseq:
+    input:
+        r1="../../../Documents/VirusAssemblathon/Ranavirus/{smp}_L001_R1_001.fastq.gz",
+        r2="../../../Documents/VirusAssemblathon/Ranavirus/{smp}_L001_R2_001.fastq.gz"
+    output:
+        prinseq1="trimmed/{smp}_prinseq_R1.fastq",
+        prinseq2="trimmed/{smp}_prinseq_R2.fastq",
+        prinseqs="trimmed/{smp}_prinseq_unpaired.fastq"
+    log:
+        "log/{smp}.prinseq.log"
+    benchmark:
+        "benchmarks/{smp}.prinseq.txt"
+    params:
+        tmp1=temp("tmp_R1.fq"),
+        tmp2=temp("tmp_R2.fq"),
+        stub=temp("tmp_no_ns")
+    shell:"""
+        gunzip -c {input.r1} > {params.tmp1}
+        gunzip -c {input.r2} > {params.tmp2}
+        prinseq-lite.pl -verbose -min_qual_mean 25 -min_len 50 -fastq {params.tmp1} -fastq2 {params.tmp2} -ns_max_n 0 -out_good {params.stub} -out_bad null 2> {log}
+        mv tmp_no_ns_1.fastq {output.prinseq1}
+        mv tmp_no_ns_2.fastq {output.prinseq2}
+        if [[ -f "tmp_no_ns_1_singletons.fastq" ]] && [[ -f "tmp_no_ns_2_singletons.fastq" ]]; then
+          cat tmp_no_ns_1_singletons.fastq tmp_no_ns_2_singletons.fastq > {output.prinseqs}
+        elif [[ -f "tmp_no_ns_1_singletons.fastq" ]]; then 
+          mv tmp_no_ns_1_singletons.fastq {output.prinseqs}
+        elif [[ -f "tmp_no_ns_2_singletons.fastq" ]]; then
+          mv tmp_no_ns_2_singletons.fastq {output.prinseqs}
+        fi
+    """
+    
+rule trimmomatic:
+    input:
+        r1="../../../Documents/VirusAssemblathon/Ranavirus/{smp}_L001_R1_001.fastq.gz",
+        r2="../../../Documents/VirusAssemblathon/Ranavirus/{smp}_L001_R2_001.fastq.gz"
+    output:
+        trim1="trimmed/{smp}_trimmomatic_R1.fastq",
+        trim2="trimmed/{smp}_trimmomatic_R2.fastq",
+        trims="trimmed/{smp}_trimmomatic_unpaired.fastq"
+    params:
+        tmp1=temp("tmp1_unpaired.fq"),
+        tmp2=temp("tmp2_unpaired.fq")
+    log:
+        "log/{smp}.trimmomatic.log"
+    benchmark:
+        "benchmarks/{smp}.trimmomatic.txt"
+    shell:"""
+        TrimmomaticPE -phred33 {input.r1} {input.r2} {output.trim1} {params.tmp1} {output.trim2} {params.tmp2} ILLUMINACLIP:TruSeq2-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:5:25 MINLEN:50
+        cat {params.tmp1} {params.tmp2} > {output.trims}
+    """
+    
+rule trimgalore:
+    input:
+        r1="../../../Documents/VirusAssemblathon/Ranavirus/{smp}_L001_R1_001.fastq.gz",
+        r2="../../../Documents/VirusAssemblathon/Ranavirus/{smp}_L001_R2_001.fastq.gz"
+    output:
+        trim1="trimmed/{smp}_trimgalore_R1.fastq",
+        trim2="trimmed/{smp}_trimgalore_R2.fastq",
+        trims="trimmed/{smp}_trimgalore_unpaired.fastq"
+    params:
+        prefix="{smp}"
+    log:
+        "log/{smp}.trimgalore.log"
+    benchmark:
+        "benchmarks/{smp}.trimgalore.txt"
+    shell:"""
+        trim_galore --quality 25 --length 50 --retain_unpaired --stringency 1 --dont_gzip --paired {input.r1} {input.r2}
+        cat {params.prefix}_L001_R1_001_unpaired_1.fq {params.prefix}_L001_R2_001_unpaired_2.fq > {output.trims}
+        mv {params.prefix}_L001_R1_001_val_1.fq {output.trim1}
+        mv {params.prefix}_L001_R2_001_val_2.fq {output.trim2}
+    """
+    
+rule plot_time:
+    input:
+      dir="benchmarks",
+      files=expand("benchmarks/{smp}.{group}.txt", smp=SAMPLES, group=GROUP)
+    output:
+      plot="time_plot.png",
+      #file=touch(expand("benchmarks/{smp}.{group}.txt", smp=SAMPLES, group=GROUP))
+    shell:"""
+      python3 PlotRunTime.py -d {input.dir} -o {output.plot}
+    """  
+
+rule bwa:
+    input:
+      ref="refs/{smp}_refs.fa",
+      r1="trimmed/{smp}_{group}_R1.fastq", 
+      r2="trimmed/{smp}_{group}_R2.fastq", 
+      single="trimmed/{smp}_{group}_unpaired.fastq"
+    params:
+        pe="aln-pe.bam",
+        se="aln-se.bam"
+    output:
+      "mapped_reads/{smp}_{group}.bam"
+    shell:"""
+      bwa index {input.ref}
+      samtools faidx {input.ref}
+      bwa mem {input.ref} {input.single} | samtools view -bS | samtools sort -o {params.se}
+      bwa mem {input.ref} {input.r1} {input.r2} | samtools view -bS | samtools sort -o  {params.pe}
+      samtools merge {output} {params.se} {params.pe}
+    """
+rule diversitools:
+    input:
+      bam="mapped_reads/{smp}_{group}.bam",
+      ref="refs/{smp}_refs.fa"
+    params:
+      prefix="diversi/{smp}_{group}"
+    output:
+      "diversi/{smp}_{group}_read.txt"
+    shell:"""
+      samtools index {input.bam}
+      diversiutils_linux -bam {input.bam} -ref {input.ref} -stub {params.prefix}
+      head {output}
+    """
+
+rule quality:
+    input:
+      pair1="trimmed/{smp}_{group}_R1.fastq",
+      pair2="trimmed/{smp}_{group}_R2.fastq",
+      unpaired="trimmed/{smp}_{group}_unpaired.fastq"
+    output:
+      pairedqual="qual/{smp}_{group}_paired.txt",
+      unpairedqual="qual/{smp}_{group}_unpaired.txt",
+    shell:"""
+      reformat.sh in1={input.pair1} in2={input.pair2} qhist={output.pairedqual}
+      reformat.sh in={input.unpaired}  qhist={output.unpairedqual}
+    """
+
+rule plot_qual:
+   input:
+      dir="qual",
+      files=expand("qual/{smp}_{group}_paired.txt", smp=SAMPLES, group=GROUP)
+   output:
+      plot="qual_plot.png",
+      #file=touch(expand("qual/{smp}_{group}_paired.txt", smp=SAMPLES, group=GROUP))
+   shell:"""
+      python3 PlotQual.py -d {input.dir} -o {output.plot}
+   """
+
+# write a python script to tabulate fq count for a list of files   
+#python3 PlotFqCount.py -d trimmed -o test.png
+
+rule plot_fqcount:
+   input:
+      dir="trimmed",
+      files=expand("trimmed/{smp}_{group}_R1.fastq", smp=SAMPLES, group=GROUP)
+   output:
+      plot="count_plot.png",
+      #file=touch(expand("trimmed/{smp}_{group}_R1.fastq", smp=SAMPLES, group=GROUP))
+   shell:"""
+      python3 PlotFqCount.py -d {input.dir} -o {output.plot}
+   """
+
+rule plot_mismatchfreq:
+   input:
+      dir="diversi",
+      files=expand("diversi/{smp}_{group}_read.txt", smp=SAMPLES, group=GROUP)
+   output:
+      plot="mismatch_plot.png",
+      #file=touch(expand("diversi/{smp}_{group}_read.txt", smp=SAMPLES, group=GROUP))
+   shell:"""
+      python3 PlotMismatch.py -d {input.dir} -o {output.plot}
+   """
