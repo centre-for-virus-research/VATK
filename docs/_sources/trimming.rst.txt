@@ -243,7 +243,7 @@ Or if you have paired-end, you need to unzip-trim (zip if you want to keep your 
 Benchmark
 #########
 
-Current benchmarking pipeline:
+Current benchmarking pipeline available here :vatk:`trimming/trimming.rst`:
 
 .. image:: dag.png
 
@@ -344,6 +344,9 @@ Trimmomatic and btrim have very low levels of mismatch frequency with condetri h
 slightly higher mismatch frequency. Trimgalore, cutadapt and prinseq have higher levels of 
 mismatches along the length of the read. Flexbar has the worst level of mismatch frequency.
 
+
+References
+##########
 
 
 .. bibliography:: trimrefs.bib
