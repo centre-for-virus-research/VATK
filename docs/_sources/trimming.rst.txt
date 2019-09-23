@@ -306,18 +306,43 @@ Commands used for benchmarking:
    mv input_R2_001_val_2.fq output_R2.fastq
 
 
-Benchmarking by time
---------------------
+Time comparison
+---------------
 
 .. image:: time_plot.png
 
 btrim < cutadapt < trimgalore < trimmomatic
 
 
-Benchmarking by reads removed
------------------------------
+Number of reads removed
+-----------------------
+
+.. image:: count_plot.png
+
+More paired reads are removed for btrim, condetri and trimmomatic but a reasonable number 
+are rescued as single reads.
+
+Per read position quality
+-------------------------
+
+.. image:: qual_plot.png
+
+The average quality is higher for trimmomatic and btrim. The decrease in quality over the 
+length of the read is not as steep. Condetri per base quality is slightly lower 
+but prinseq, trimgalore, cutadapt have even lower average quality and flexbar has the 
+lowest average quality.
+Flexbar has very few single reads rescued, hence the distribution. Some further singleton 
+quality filtering is probably needed for cutadapt, trim_galore and flexbar.
 
 
+Per read position mismatch
+--------------------------
+
+.. image:: mismatch_plot.png
+
+Trimmomatic and btrim have very low levels of mismatch frequency with condetri having a 
+slightly higher mismatch frequency. Trimgalore, cutadapt and prinseq have higher levels of 
+mismatches along the length of the read. Flexbar has the worst level of mismatch frequency.
 
 
 

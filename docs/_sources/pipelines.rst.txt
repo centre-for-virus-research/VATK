@@ -10,7 +10,7 @@ to a reference sequence. The script expect 4 arguments.
 
 .. code-block:: bash
 
-alignmentStats_ReCVR.sh <input_dir> <ref.fa> <signature.fa> <lib_name>
+   alignmentStats_ReCVR.sh <input_dir> <ref.fa> <signature.fa> <lib_name>
 
 
 **Input**
@@ -51,8 +51,8 @@ Pipeline
 
 * Step 1:
 
-Each fastq file in the folder is trimmed using [trim_galore](https://github.com/FelixKrueger/TrimGalore)
- with the following settings (--paired --length 21 --quality 10 --stringency 3).
+Each fastq file in the folder is trimmed using `trim_galore <https://github.com/FelixKrueger/TrimGalore>`_ with the following settings 
+(--paired --length 21 --quality 10 --stringency 3).
 
 * Step 2:
 

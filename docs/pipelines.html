@@ -39,10 +39,9 @@
 <h2>HCMV pipeline<a class="headerlink" href="#hcmv-pipeline" title="Permalink to this headline">¶</a></h2>
 <p><strong>alignmentStats_ReCVR.sh</strong> is a bash script written to align multiple fastq files
 to a reference sequence. The script expect 4 arguments.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>alignmentStats_ReCVR.sh &lt;input_dir&gt; &lt;ref.fa&gt; &lt;signature.fa&gt; &lt;lib_name&gt;
 </pre></div>
 </div>
-<p>alignmentStats_ReCVR.sh &lt;input_dir&gt; &lt;ref.fa&gt; &lt;signature.fa&gt; &lt;lib_name&gt;</p>
 <p><strong>Input</strong></p>
 <p><strong>&lt;input_dir&gt;</strong> is a directory of paired fastq files. The fastq files need to be in a directory
 and have the extension _R1_001.fastq and _R2_001.fastq (or _R1_001.fq and _R2_001.fq).</p>
@@ -66,10 +65,8 @@ and have the extension _R1_001.fastq and _R2_001.fastq (or _R1_001.fq and _R2_00
 <ul class="simple">
 <li>Step 1:</li>
 </ul>
-<dl class="docutils">
-<dt>Each fastq file in the folder is trimmed using [trim_galore](<a class="reference external" href="https://github.com/FelixKrueger/TrimGalore">https://github.com/FelixKrueger/TrimGalore</a>)</dt>
-<dd>with the following settings (–paired –length 21 –quality 10 –stringency 3).</dd>
-</dl>
+<p>Each fastq file in the folder is trimmed using <a class="reference external" href="https://github.com/FelixKrueger/TrimGalore">trim_galore</a> with the following settings
+(–paired –length 21 –quality 10 –stringency 3).</p>
 <ul class="simple">
 <li>Step 2:</li>
 </ul>

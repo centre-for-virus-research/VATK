@@ -304,13 +304,33 @@ mv input_R1_001_val_1.fq output_R1.fastq
 mv input_R2_001_val_2.fq output_R2.fastq
 </pre></div>
 </div>
-<div class="section" id="benchmarking-by-time">
-<h3>Benchmarking by time<a class="headerlink" href="#benchmarking-by-time" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="time-comparison">
+<h3>Time comparison<a class="headerlink" href="#time-comparison" title="Permalink to this headline">¶</a></h3>
 <img alt="_images/time_plot.png" src="_images/time_plot.png" />
 <p>btrim &lt; cutadapt &lt; trimgalore &lt; trimmomatic</p>
 </div>
-<div class="section" id="benchmarking-by-reads-removed">
-<h3>Benchmarking by reads removed<a class="headerlink" href="#benchmarking-by-reads-removed" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="number-of-reads-removed">
+<h3>Number of reads removed<a class="headerlink" href="#number-of-reads-removed" title="Permalink to this headline">¶</a></h3>
+<img alt="_images/count_plot.png" src="_images/count_plot.png" />
+<p>More paired reads are removed for btrim, condetri and trimmomatic but a reasonable number
+are rescued as single reads.</p>
+</div>
+<div class="section" id="per-read-position-quality">
+<h3>Per read position quality<a class="headerlink" href="#per-read-position-quality" title="Permalink to this headline">¶</a></h3>
+<img alt="_images/qual_plot.png" src="_images/qual_plot.png" />
+<p>The average quality is higher for trimmomatic and btrim. The decrease in quality over the
+length of the read is not as steep. Condetri per base quality is slightly lower
+but prinseq, trimgalore, cutadapt have even lower average quality and flexbar has the
+lowest average quality.
+Flexbar has very few single reads rescued, hence the distribution. Some further singleton
+quality filtering is probably needed for cutadapt, trim_galore and flexbar.</p>
+</div>
+<div class="section" id="per-read-position-mismatch">
+<h3>Per read position mismatch<a class="headerlink" href="#per-read-position-mismatch" title="Permalink to this headline">¶</a></h3>
+<img alt="_images/mismatch_plot.png" src="_images/mismatch_plot.png" />
+<p>Trimmomatic and btrim have very low levels of mismatch frequency with condetri having a
+slightly higher mismatch frequency. Trimgalore, cutadapt and prinseq have higher levels of
+mismatches along the length of the read. Flexbar has the worst level of mismatch frequency.</p>
 <p id="bibtex-bibliography-trimming-0"><table class="docutils citation" frame="void" id="aronesty2013" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
