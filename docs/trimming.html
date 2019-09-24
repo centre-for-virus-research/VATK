@@ -140,6 +140,10 @@ Duplicate removal and contaminant sequence filtering will be covered elsewhere.<
 <td><a class="reference external" href="https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/">https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/</a></td>
 <td>N/A</td>
 </tr>
+<tr class="row-odd"><td>BBDuk</td>
+<td><a class="reference external" href="https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide/">https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide/</a></td>
+<td>N/A</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -206,19 +210,10 @@ interaction, trim and remove reads with low quality scores. See  <a class="refer
 </pre></div>
 </div>
 </div>
-<div class="section" id="fastx">
-<h3>FASTX:<a class="headerlink" href="#fastx" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ fastx_trimmer -h
-usage: fastx_trimmer <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>-f N<span class="o">]</span> <span class="o">[</span>-l N<span class="o">]</span> <span class="o">[</span>-z<span class="o">]</span> <span class="o">[</span>-v<span class="o">]</span> <span class="o">[</span>-i INFILE<span class="o">]</span> <span class="o">[</span>-o OUTFILE<span class="o">]</span>
-version <span class="m">0</span>.0.6
-  <span class="o">[</span>-h<span class="o">]</span>         <span class="o">=</span> This helpful <span class="nb">help</span> screen.
-  <span class="o">[</span>-f N<span class="o">]</span>       <span class="o">=</span> First base to keep. Default is <span class="m">1</span> <span class="o">(=</span>first base<span class="o">)</span>.
-  <span class="o">[</span>-l N<span class="o">]</span>       <span class="o">=</span> Last base to keep. Default is entire read.
-  <span class="o">[</span>-z<span class="o">]</span>         <span class="o">=</span> Compress output with GZIP.
-  <span class="o">[</span>-i INFILE<span class="o">]</span>  <span class="o">=</span> FASTA/Q input file. default is STDIN.
-  <span class="o">[</span>-o OUTFILE<span class="o">]</span> <span class="o">=</span> FASTA/Q output file. default is STDOUT.
-</pre></div>
-</div>
+<div class="section" id="trim-galore">
+<h3>Trim_galore<a class="headerlink" href="#trim-galore" title="Permalink to this headline">¶</a></h3>
+<p>Trim_galore is a wrapper around cutadapt with a few additions.
+See <a class="reference external" href="help/trimgalore.txt">trim_galore -h</a></p>
 </div>
 <div class="section" id="flexbar">
 <h3>Flexbar:<a class="headerlink" href="#flexbar" title="Permalink to this headline">¶</a></h3>
@@ -253,6 +248,19 @@ pairfq makepairs -f input_R1.trim.gz -r input_R2.trim.gz -fp output_R1.trim.fast
   -rp output_R2.trim.fastq-common.out.gz -fs output_R1.trim.fastq-unique.out.gz -rs output_R2.trim.fastq-unique.out.gz --compress gzip
 </pre></div>
 </div>
+</div>
+<div class="section" id="bbduk">
+<h3>BBDuk:<a class="headerlink" href="#bbduk" title="Permalink to this headline">¶</a></h3>
+<p>One annoying thing about BBDuk.sh is that autocompletion of file names is reduced due to
+the way arguments are specified for the bash script (e.g., -in1=input_R1.fq). BBDuk uses a kmer based
+approach for doing the quality trimming. It also has a large number of other data filtering options.
+See <a class="reference external" href="help/bbduk.txt">bbduk.sh -h -help</a></p>
+</div>
+<div class="section" id="trimmomatic">
+<h3>Trimmomatic:<a class="headerlink" href="#trimmomatic" title="Permalink to this headline">¶</a></h3>
+<p>A very highly cited program with a broad range of functionalities and reasonably straight forward to use.
+It doesn’t have a command-line help but the manual PDF can be
+found <a class="reference external" href="http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/TrimmomaticManual_V0.32.pdf">here</a>.</p>
 </div>
 </div>
 <div class="section" id="benchmark">
