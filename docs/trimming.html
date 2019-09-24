@@ -304,16 +304,29 @@ mv input_R1_001_val_1.fq output_R1.fastq
 mv input_R2_001_val_2.fq output_R2.fastq
 </pre></div>
 </div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gunzip -c input_R1.fastq.gz &gt; tmp_R1.fq
+gunzip -c input_R2.fastq.gz &gt; tmp_R2.fq
+bbduk.sh <span class="nv">in1</span><span class="o">=</span>tmp_R1.fq <span class="nv">in2</span><span class="o">=</span>tmp_R2.fq <span class="nv">out1</span><span class="o">=</span>output_R1.fastq <span class="nv">out2</span><span class="o">=</span>output_R2.fastq <span class="nv">qtrim</span><span class="o">=</span>lr <span class="nv">trimq</span><span class="o">=</span><span class="m">25</span> <span class="nv">minlen</span><span class="o">=</span><span class="m">50</span> <span class="nv">rieb</span><span class="o">=</span><span class="nb">false</span> <span class="nv">outm1</span><span class="o">=</span>tmp1_unpaired.fq <span class="nv">outm2</span><span class="o">=</span>tmp2_unpaired.fq <span class="nv">overwrite</span><span class="o">=</span><span class="nb">true</span>
+cat tmp1_unpaired.fq tmp2_unpaired.fq &gt; tmp_unpaired.fq
+bbduk.sh <span class="nv">in</span><span class="o">=</span>tmp_unpaired.fq <span class="nv">out</span><span class="o">=</span>output_unpaired.fastq  <span class="nv">qtrim</span><span class="o">=</span>lr <span class="nv">trimq</span><span class="o">=</span><span class="m">25</span> <span class="nv">minlen</span><span class="o">=</span><span class="m">50</span> <span class="nv">overwrite</span><span class="o">=</span><span class="nb">true</span>
+</pre></div>
+</div>
 <div class="section" id="time-comparison">
 <h3>Time comparison<a class="headerlink" href="#time-comparison" title="Permalink to this headline">¶</a></h3>
 <img alt="_images/time_plot.png" src="_images/time_plot.png" />
 <p>btrim &lt; cutadapt &lt; trimgalore &lt; trimmomatic</p>
 </div>
-<div class="section" id="number-of-reads-removed">
-<h3>Number of reads removed<a class="headerlink" href="#number-of-reads-removed" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="number-of-reads-remaining">
+<h3>Number of reads remaining<a class="headerlink" href="#number-of-reads-remaining" title="Permalink to this headline">¶</a></h3>
 <img alt="_images/count_plot.png" src="_images/count_plot.png" />
 <p>More paired reads are removed for btrim, condetri and trimmomatic but a reasonable number
 are rescued as single reads.</p>
+</div>
+<div class="section" id="number-of-bases-kept">
+<h3>Number of bases kept<a class="headerlink" href="#number-of-bases-kept" title="Permalink to this headline">¶</a></h3>
+<img alt="_images/base_plot.png" src="_images/base_plot.png" />
+<p>The effect of trimming in terms of bases lost is not dramatically marked for btrim,
+condetri, trimmomatic and bbduk.</p>
 </div>
 <div class="section" id="per-read-position-quality">
 <h3>Per read position quality<a class="headerlink" href="#per-read-position-quality" title="Permalink to this headline">¶</a></h3>

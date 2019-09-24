@@ -305,6 +305,14 @@ Commands used for benchmarking:
    mv input_R1_001_val_1.fq output_R1.fastq
    mv input_R2_001_val_2.fq output_R2.fastq
 
+.. code-block:: bash
+
+   gunzip -c input_R1.fastq.gz > tmp_R1.fq
+   gunzip -c input_R2.fastq.gz > tmp_R2.fq
+   bbduk.sh in1=tmp_R1.fq in2=tmp_R2.fq out1=output_R1.fastq out2=output_R2.fastq qtrim=lr trimq=25 minlen=50 rieb=false outm1=tmp1_unpaired.fq outm2=tmp2_unpaired.fq overwrite=true
+   cat tmp1_unpaired.fq tmp2_unpaired.fq > tmp_unpaired.fq
+   bbduk.sh in=tmp_unpaired.fq out=output_unpaired.fastq  qtrim=lr trimq=25 minlen=50 overwrite=true
+
 
 Time comparison
 ---------------
@@ -314,13 +322,23 @@ Time comparison
 btrim < cutadapt < trimgalore < trimmomatic
 
 
-Number of reads removed
------------------------
+Number of reads remaining
+-------------------------
 
 .. image:: count_plot.png
 
 More paired reads are removed for btrim, condetri and trimmomatic but a reasonable number 
 are rescued as single reads.
+
+Number of bases kept
+--------------------
+
+.. image:: base_plot.png
+
+The effect of trimming in terms of bases lost is not dramatically marked for btrim, 
+condetri, trimmomatic and bbduk.
+
+
 
 Per read position quality
 -------------------------
