@@ -254,7 +254,7 @@ pairfq makepairs -f input_R1.trim.gz -r input_R2.trim.gz -fp output_R1.trim.fast
 <p>One annoying thing about BBDuk.sh is that autocompletion of file names is reduced due to
 the way arguments are specified for the bash script (e.g., -in1=input_R1.fq). BBDuk uses a kmer based
 approach for doing the quality trimming. It also has a large number of other data filtering options.
-See <a class="reference external" href="help/bbduk.txt">bbduk.sh -h -help</a></p>
+See <a class="reference external" href="help/bbduk.txt">bbduk.sh -h</a></p>
 </div>
 <div class="section" id="trimmomatic">
 <h3>Trimmomatic:<a class="headerlink" href="#trimmomatic" title="Permalink to this headline">¶</a></h3>
@@ -352,6 +352,13 @@ quality filtering is probably needed for cutadapt, trim_galore and flexbar.</p>
 <p>Trimmomatic and btrim have very low levels of mismatch frequency with condetri having a
 slightly higher mismatch frequency. Trimgalore, cutadapt and prinseq have higher levels of
 mismatches along the length of the read. Flexbar has the worst level of mismatch frequency.</p>
+<p>In the context of low-frequency variant calling, Trimmomatic and btrim are good options. BBDuk
+also performs well, in this case it does not rescue any singletons but does not discard as
+many reads it does this by trimming the length more agressively, which results in a higher
+average quality to the right of the read. Condetri also performs reasonably well.</p>
+<p>If there is a limited depth of coverage across the genome, then the poor trimming will
+also affect the consensus calling so it is advisable to also use trimmomatic and btrim.</p>
+<p>The tools that use a window or k-mer approach perform better in the metrics used here.</p>
 </div>
 </div>
 <div class="section" id="references">
