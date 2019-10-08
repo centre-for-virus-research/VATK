@@ -45,7 +45,7 @@ for my $gene (keys %gene_genotype){
   for my $genotype (keys %{$gene_genotype{$gene}}){
     my $perc_genotype=($gene_genotype{$gene}{$genotype}/$mapped{$gene})*100;
     #print "$genotype $perc_genotype\n";
-    if ($perc_genotype>2){
+    if ($perc_genotype>$perc){
       $genotype_cnt{$gene}++;    
     }
   }
